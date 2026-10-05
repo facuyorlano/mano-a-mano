@@ -2354,12 +2354,15 @@ function wDiarioHTML(w){const seasons=[...new Set((w.news||[]).map(n=>n.s))].sor
 const WCAL2=['L','C','L','C','L','C','L','C','E','L','L','C','L','L','C','L','C'],WCAL3=[...WCAL2,'P','P','S','S','S'],WCAL4=[...WCAL3,'N','N','N','N','N','N','N','N','N','M','M','M','M'];
 function cal(w){return w.cal||WCAL;}
 function starScore(w,id){const P=w.ps[id],d=divOf(w,id),T=w.table[d]&&w.table[d][id];if(!P||!P.gp||!T)return -1;return T.g*2+P.pts/P.gp+(P.stl+P.blk)/P.gp*1.2;}
-function ensureAsg(w){if(w.asg&&w.asg.s===w.season)return w.asg;
-  const best=ids=>ids.slice().sort((a,b)=>starScore(w,b)-starScore(w,a))[0];const G=[[0],[1],[2],[3,4]];
-  const stars=G.map(g=>best(g.flatMap(d=>w.divs[d])));const myD=divOf(w,'you'),gi=G.findIndex(g=>g.includes(myD));if(best(w.divs[myD])==='you')stars[gi]='you';
+function asgStars(w){const lead=d=>{const s=wStand(w,d)[0];return s?{id:s.id,g:s.g,df:s.pf-s.pc}:{id:w.divs[d][0],g:0,df:0};};
+  const t=lead(3),c=lead(4),asc=(c.g>t.g||(c.g===t.g&&c.df>t.df))?c.id:t.id;return [lead(0).id,lead(1).id,lead(2).id,asc];}
+function ensureAsg(w){if(w.asg&&w.asg.s===w.season){const A=w.asg;
+    if(!A.v2&&!A.final&&!A.champ&&A.semis.every(s=>!s.r)){A.v2=true;const st=asgStars(w);A.stars=st;A.semis=[{a:st[0],b:st[3],r:null},{a:st[1],b:st[2],r:null}];}
+    return A;}
+  const stars=asgStars(w);
   const shooters=w.divs.map(d=>d.slice().sort((a,b)=>wStats(w,b).three-wStats(w,a).three)[0]),youIn=shooters.includes('you');
   const triAI={};shooters.forEach(id=>{if(id!=='you')triAI[id]=triSim(wStats(w,id));});
-  w.asg={s:w.season,shooters,youTri:youIn,stars,semis:[{a:stars[0],b:stars[3],r:null},{a:stars[1],b:stars[2],r:null}],final:null,champ:null,triAI,tri:null,triChamp:null,paidS:false,paidT:false};return w.asg;}
+  w.asg={s:w.season,v2:true,shooters,youTri:youIn,stars,semis:[{a:stars[0],b:stars[3],r:null},{a:stars[1],b:stars[2],r:null}],final:null,champ:null,triAI,tri:null,triChamp:null,paidS:false,paidT:false};return w.asg;}
 function asgMyGame(w){const A=w.asg;if(!A)return null;const s=A.semis.find(s=>!s.r&&(s.a==='you'||s.b==='you'));if(s)return {g:s,round:'Semifinal'};
   if(A.final&&!A.final.r&&(A.final.a==='you'||A.final.b==='you'))return {g:A.final,round:'Final'};return null;}
 function asgSim(w,all){const A=w.asg;
@@ -2378,7 +2381,7 @@ function asgFinish(w){const A=ensureAsg(w);asgSim(w,true);if(A.tri==null)A.tri=-
   const f=A.final;addNews(w,`${nT(A.champ)} ganó el Juego de las Estrellas`,`En la final le ganó ${Math.max(...f.r)}-${Math.min(...f.r)} a ${nT(f.a===A.champ?f.b:f.a)}. Las cuatro estrellas: ${A.stars.map(nT).join(', ')}.`,A.champ==='you'?'you':'estrellas');
   const tr=triRank(A);addNews(w,`${nT(A.triChamp)} se quedó con el Concurso de triples`,`Metió ${tr[0][1]} puntos.${A.tri>=0&&A.triChamp!=='you'?` ${nT('you')} hizo ${A.tri}.`:''}`,A.triChamp==='you'?'you':'estrellas');
   return out;}
-function asgHTML(w){const A=ensureAsg(w),star=A.stars.includes('you');let h=`<div class="asgbox"><h4>Fin de semana de las Estrellas</h4><p class="sub" style="margin:0 0 8px">A mitad de temporada se juntan los mejores: la estrella de cada división juega el Juego de las Estrellas (semifinales y final) y los mejores tiradores, el Concurso de triples.</p>`;
+function asgHTML(w){const A=ensureAsg(w),star=A.stars.includes('you');let h=`<div class="asgbox"><h4>Fin de semana de las Estrellas</h4><p class="sub" style="margin:0 0 8px">A mitad de temporada se juntan los mejores: el puntero de la NBA, de Primera y de Segunda, más el mejor puntero entre Tercera y Cuarta, juegan el Juego de las Estrellas (semifinales y final) y los mejores tiradores, el Concurso de triples.</p>`;
   const tr=triRank(A);
   const sh=A.shooters||Object.keys(A.triAI),done=A.tri!=null||!A.youTri,divL=id=>{const d=divOf(w,id);return d>=0?' <small class="sub">'+DIVSH[d]+'</small>':'';};
   h+=`<h3>Concurso de triples</h3><p class="sub" style="font-size:14px;margin:0 0 6px">Compite el mejor tirador de triples de cada división esta temporada.</p><div class="results">${(done&&A.triChamp?tr:sh.map(id=>[id,null])).map(([id,v],i)=>`<div><span>${done&&A.triChamp?(i+1)+'. ':''}${nm(id)}${divL(id)}</span><span>${v==null?'—':v+' pts'}</span></div>`).join('')}</div>`;
