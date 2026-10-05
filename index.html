@@ -30,9 +30,9 @@ body{height:100%;margin:0;background:var(--ink);color:var(--chalk);font-family:v
 button,a,input,.chip,.btn,.card,.tcard,.mitem,.pl{touch-action:manipulation}
 #app{position:relative;width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--ink)}
 #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);touch-action:none}
-#app.portrait #stage{top:0;transform:translateX(-50%)}
+#app.portrait #stage{top:env(safe-area-inset-top,0px);transform:translateX(-50%)}
 #cv{display:block;width:100%;height:100%}
-#topbar{position:absolute;left:8px;top:8px;display:flex;gap:8px}
+#topbar{position:absolute;left:max(8px,env(safe-area-inset-left,0px));top:8px;display:flex;gap:8px}
 .ibtn{width:40px;height:40px;border-radius:50%;border:2px solid rgba(246,241,228,.75);background:rgba(11,24,48,.55);color:var(--chalk);
   font:700 15px var(--f-ui);display:grid;place-items:center;cursor:pointer;padding:0}
 .ibtn:focus-visible{outline:3px solid var(--paint);outline-offset:2px}
@@ -49,12 +49,16 @@ button,a,input,.chip,.btn,.card,.tcard,.mitem,.pl{touch-action:manipulation}
 .act.t{grid-area:t;width:74px;height:74px;background:rgba(61,180,120,.75);font-size:15px}
 .act.a{grid-area:a;width:104px;height:104px;background:rgba(242,106,30,.88);font-size:22px}
 .act.on{transform:scale(.92);filter:brightness(1.25)}
-#app.portrait #controls{top:var(--stage-h,80vw)}
+#app.portrait #controls{top:calc(var(--stage-h,80vw) + env(safe-area-inset-top,0px))}
 #rotHint{display:none;position:absolute;left:16px;right:16px;top:10px;margin:0;text-align:center;font:600 14px var(--f-ui);color:var(--muted);pointer-events:none}
 #app.portrait #rotHint{display:block}
-#app.portrait #pad{left:16px;bottom:auto;top:55%;transform:translateY(-50%);width:46%;max-width:240px;height:110px;border-radius:56px}
-#app.portrait #pad .arr{width:88px;height:88px}
-#app.portrait #acts{right:16px;bottom:auto;top:55%;transform:translateY(-50%)}
+#app.portrait #pad{left:max(14px,env(safe-area-inset-left,0px));top:auto;bottom:max(22px,env(safe-area-inset-bottom,0px));transform:none;width:44%;max-width:200px;height:84px;border-radius:42px}
+#app.portrait #pad .arr{width:68px;height:68px;font-size:24px}
+#app.portrait #acts{right:max(14px,env(safe-area-inset-right,0px));top:auto;bottom:max(22px,env(safe-area-inset-bottom,0px));transform:none;gap:8px 10px}
+#app.portrait .act.a{width:86px;height:86px;font-size:19px}
+#app.portrait .act.b{width:64px;height:64px;font-size:13px;margin-right:8px}
+#app.portrait .act.t{width:60px;height:60px;font-size:13px}
+@media (max-height:450px){.act.a{width:88px;height:88px;font-size:19px}.act.b{width:66px;height:66px;font-size:14px}.act.t{width:62px;height:62px;font-size:13px}#pad{width:176px;height:84px}#pad .arr{width:66px;height:66px}}
 
 #hint{position:absolute;left:0;right:0;bottom:6px;text-align:center;font:600 13px var(--f-ui);color:var(--muted);pointer-events:none;letter-spacing:.03em;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 
@@ -311,8 +315,6 @@ td.mecell{color:var(--paint)}
 }
 @media (prefers-reduced-motion:reduce){.vs .l,.vs .r,.vs .mid{animation:none}}
 </style>
-</head><body>
-
 
 <div id="app">
   <div id="stage">
@@ -1638,7 +1640,7 @@ function render(dt){
 const app=$('#app'),stage=$('#stage'),controls=$('#controls');
 const isTouch=matchMedia('(pointer:coarse)').matches||('ontouchstart' in window);
 function layout(){const vw=app.clientWidth,vh=app.clientHeight;const portrait=vh>vw*1.05;app.classList.toggle('portrait',portrait);
-  VW=portrait?600:W;let cw,ch;if(portrait){cw=vw;ch=cw*H/VW;}else{const s=Math.min(vw/W,vh/H);cw=W*s;ch=H*s;}
+  VW=portrait?Math.round(clamp(vw*1.12,420,520)):W;let cw,ch;if(portrait){cw=vw;ch=cw*H/VW;}else{const s=Math.min(vw/W,vh/H);cw=W*s;ch=H*s;}
   stage.style.width=cw+'px';stage.style.height=ch+'px';app.style.setProperty('--stage-h',ch+'px');
   const dpr=Math.min(2.5,window.devicePixelRatio||1);cv.width=Math.round(cw*dpr);cv.height=Math.round(ch*dpr);K=cv.width/VW;bgDirty=true;}
 addEventListener('resize',layout);
@@ -2751,4 +2753,3 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{bgDirty=t
 </script>
 
 <script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
-</body></html>
