@@ -24,6 +24,7 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+.awgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:6px 0}.awc{background:rgba(11,24,48,.35);border:1px solid rgba(246,241,228,.15);border-radius:10px;padding:8px 10px;font-size:14px}.awc.me{border-color:var(--paint)}.awc>b{display:block;color:var(--paint);font-family:var(--f-display);font-weight:400;letter-spacing:.03em;margin-bottom:4px}.awc div{display:flex;flex-direction:column;margin:3px 0}.awc .sub{font-size:12px}
 html{height:100%;position:fixed;inset:0;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
 body{height:100%;margin:0;background:var(--ink);color:var(--chalk);font-family:var(--f-ui);font-size:16px;overflow:hidden;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;position:fixed;inset:0;width:100%;touch-action:manipulation}
@@ -918,7 +919,23 @@ function rollWind(){game.wind=COURTS[game.court].wind?(rand()<.5?-1:1)*(8+rand()
 /* ================= messages & particles ================= */
 let lastComment=0;
 function comment(lines){if(game.mode!=='match')return;if(game.t-lastComment<1.4&&!Array.isArray(lines.force))return;lastComment=game.t;const t=Array.isArray(lines)?lines[Math.floor(rand()*lines.length)]:lines;game.ticker={text:t,t:0};}
+const COURT_TALK={
+  potrero:{start:['¡Partido en el potrero! Tierra, piedritas y aro de cadena.','En el potrero no hay excusas: se juega como se puede.'],score:['¡Levantó polvareda {n}!','{n} la mete y vuela la tierra.','¡Así se juega en el potrero, {n}!'],dunk:['¡Se colgó de la cadena {n}!']},
+  plaza:{start:['Tarde de plaza: los vecinos se juntan alrededor del alambrado.','Plaza del barrio, aro de cadena y mate en los bancos.'],score:['¡Aplauden desde los bancos de la plaza!','{n} la mete y los pibes de las hamacas gritan.'],dunk:['¡Tembló la cadena con {n}!']},
+  playa:{start:['Arena y sol: acá cuesta hasta correr.'],score:['¡{n} la mete con la arena hasta los tobillos!','Festejan en la orilla: ¡adentro, {n}!'],dunk:['¡Volcada en la playa de {n}!']},
+  playon:{start:['Playón del barrio: cemento y techo de chapa.'],score:['¡Retumba la chapa con el tanto de {n}!','{n} adentro, y el playón se viene abajo.'],dunk:['¡Se movió todo el techo con la volcada de {n}!']},
+  azotea:{start:['Noche en la terraza: viento y luces de la ciudad.'],score:['¡{n} la mete con la ciudad de fondo!','Ojo con el viento… ¡y adentro igual, {n}!'],dunk:['¡Volcada en las alturas de {n}!']},
+  club:{start:['Club de barrio: parquet, buffet y la barra de siempre.'],score:['¡Suena el bombo del club! {n} anota.','¡Desde el buffet festejan el tanto de {n}!'],dunk:['¡Se cae el club con {n}!']},
+  polide:{start:['Polideportivo municipal: tribuna chica pero ruidosa.'],score:['¡{n} anota y la tribunita se para!','¡Qué bien juega {n} en el poli!'],dunk:['¡Volcada de {n} en el polideportivo!']},
+  gimnasio:{start:['Gimnasio lleno: esto ya es otra cosa.'],score:['¡Se viene abajo el gimnasio con {n}!','{n} la mete y la barra no para de cantar.'],dunk:['¡Hizo temblar el gimnasio {n}!']},
+  estadio:{start:['Estadio cubierto, luces altas y TV en vivo.'],score:['¡Explota el estadio con {n}!','{n} adentro y el estadio entero de pie.'],dunk:['¡Volcada para la tele de {n}!']},
+  euro:{start:['Noche europea: ambiente de Euroliga, pura presión.'],score:['¡Qué jugada de {n}, digna de Euroliga!','{n} anota y ruge la arena europea.'],dunk:['¡Volcada continental de {n}!']},
+  nba:{start:['¡Arena NBA! Pantalla gigante, música y estrellas en primera fila.'],score:['¡{n} en la pantalla gigante!','¡Highlight de {n} para todo el planeta!','¡Showtime, {n}!'],dunk:['¡Volcada de {n} para los resúmenes del mundo entero!']}};
+function courtTalk(kind,n){const C=COURT_TALK[game.court];let L=C&&C[kind];if(!L)return null;L=L.slice();
+  if(kind==='start'){if(game.tod==='noche')L=['Se juega de noche, bajo las luces.'];else if(game.tod==='atardecer')L=['Cae el sol: se juega al atardecer.'];if(game.chapa)L=['Llueve fuerte sobre la chapa, pero acá abajo se juega igual.'];if(game.rain)L=['¡Llueve! La pelota va a resbalar.'];}
+  return L.map(x=>x.split('{n}').join(n||''));}
 function commentPlay(sc,shot,pts){const n=sc.name.split(' ').slice(-1)[0];
+  if(!shot.ft&&rand()<.3){const L=courtTalk(shot.dunk?'dunk':'score',n);if(L)return comment(L);}
   if(shot.ft)return comment(['Tiro libre adentro.','Libre convertido.']);
   if(shot.tip)return comment(['¡Palmeo de '+n+'!','¡La empujó '+n+' en el rebote!']);
   if(shot.dunk)return comment(['¡La clavó '+n+'!','¡Volcadón de '+n+'!','¡Se colgó del aro '+n+'!']);
@@ -951,11 +968,11 @@ function readHuman(){const kL=keys.ArrowLeft||keys.KeyA,kR=keys.ArrowRight||keys
   const aDown=A_KEYS.some(k=>keys[k]&&!zKey(k))||touch.a;const up=!!(save.d25&&((bh?kL:kU)||touch.up)),down=!!(save.d25&&((bh?kR:kD)||touch.down));const tDown=T_KEYS.some(k=>keys[k])||touch.t;const r={left,right,aDown,tDown,aPressed:qA>0,aReleased:qAr>0,bPressed:qB>0,swipe:qSw,up,down,mag:(touch.left||touch.right||touch.up||touch.down)&&!(kL||kR||kU||kD)?(touch.mag||1):1};qA=qAr=qB=0;qSw=null;return r;}
 
 /* ================= match flow ================= */
-function setupMatch(a,b,cfg){
+function setupMatch(a,b,cfg){lastComment=-9;
   game.players=[makePlayer(0,a),makePlayer(1,b)];game.court=cfg.court;game.target=cfg.target||11;game.cap=game.target+4;game.rule=cfg.rule||'cambio';game.pendingFT=null;game.adOut=game.adIn=false;['cross','hesi','pump','step','spin'].forEach(k=>game['ad'+k]=false);
   {const pt=save.tend||{};game.tend={};for(const k of ['out','inn','drive','cross','hesi','pump','step','spin','post'])game.tend[k]=Math.round((pt[k]||0)*.4);}
   game.timeMode=true;game.clock=cfg.time||120;game.target=11;game.cap=999;game.golden=false;game.buzzer=false;game.clutch=false;game.clutchShown=false;
-  game.tri=null;game.rain=!!cfg.rain&&cfg.mode!=='demo';game.refMul=cfg.ref!=null&&REFS[cfg.ref]?REFS[cfg.ref][2]:1;game.homeI=cfg.home==='you'?0:cfg.home?1:-1;game.crowd=0;game.mode=cfg.mode||'match';game.cfg=cfg;game.msgs=[];game.parts=[];game.over=false;game.shake=0;bgDirty=true;HOOP.net=0;HOOP.flex=0;
+  game.tri=null;game.rain=!!cfg.rain&&cfg.mode!=='demo';game.tod=cfg.tod||null;game.chapa=!!cfg.chapa&&cfg.mode!=='demo';game.introC=cfg.mode!=='demo'&&!cfg.tri;game.dripT=0;game.refMul=cfg.ref!=null&&REFS[cfg.ref]?REFS[cfg.ref][2]:1;game.homeI=cfg.home==='you'?0:cfg.home?1:-1;game.crowd=0;game.mode=cfg.mode||'match';game.cfg=cfg;game.msgs=[];game.parts=[];game.over=false;game.shake=0;bgDirty=true;HOOP.net=0;HOOP.flex=0;
   ZR=save&&save.d3?320:280;game.adjDone=false;game.players.forEach(p=>{p.plan=null;});if(game.mode==='match'&&cfg.load>=4&&game.players[0].ctrl==='human')game.players[0].fat=Math.min(.4,(cfg.load-3)*.1);if(game.mode==='match'&&cfg.train&&game.players[0].ctrl==='human')game.players[0].win*=1.1;if(game.mode==='match'&&cfg.rival&&game.players[1].ctrl==='ai'&&game.players[0].ctrl==='human')game.players[1].plan=makePlan(game.players[1],game.players[0],cfg);
   const first=cfg.first!=null?cfg.first:(rand()<.5?0:1);startCheck(first,true);game.running=true;game.paused=false;
 }
@@ -1590,6 +1607,8 @@ function step(dt){
   separate(P[0],P[1]);driveBy(dt);updateBall(dt);
   if(game.phase==='play'&&ball.shot&&ball.shot.fouled&&!ball.shot.ft&&ball.state==='loose'&&((ball.vy>0&&ball.y>RIM_Y+45)||ball.y>=FLOOR-BR-1||Math.abs(ball.x-HOOP.cx)>90)){const f=ball.shot.fouled,v=ball.shot.shooter;ball.shot=null;callFoul(f,v,true);return;}
   if(game.phase==='play'){
+    if(game.introC&&game.t>.8){game.introC=false;const L=courtTalk('start');if(L)comment(L);}
+    if(game.chapa){game.dripT-=dt;if(game.dripT<=0){game.dripT=.07+rand()*.08;noise(.04,.008+rand()*.01,2600+rand()*3000,'highpass',.8);}}
     const cl=isClutch();if(cl&&!game.clutch&&!game.clutchShown&&game.mode==='match'){game.clutchShown=true;bigMsg('MOMENTO DE DEFINICIÓN','La presión achica la franja verde','#ff7a6a',1.6);comment(['¡Se viene la definición! A ver quién tiene sangre fría.','¡Momento de los cracks!']);noise(1.6,.1,600,'bandpass',.5);}
     game.clutch=cl;game.crowd=Math.max(0,(game.crowd||0)-dt);
     const hb=ball.holder;
@@ -1764,12 +1783,22 @@ function drawCourtBG(c,key){srand(key.length*977+13);c.clearRect(0,0,W,H);
     courtLines(c,'rgba(255,255,255,.95)','#1c4fa0',.9);
   }
 }
-function buildBG(){bgCanvas.width=Math.round(W*K);bgCanvas.height=Math.round(H*K);const b=bgCanvas.getContext('2d');b.setTransform(K,0,0,K,0,0);drawCourtBG(b,game.court);
+function todOverlay(c){const t=game.tod;if(!t||t==='dia'||game.court==='azotea')return;c.save();
+  if(t==='atardecer'){const g=c.createLinearGradient(0,0,0,FT);g.addColorStop(0,'rgba(120,60,140,.45)');g.addColorStop(.6,'rgba(255,120,60,.35)');g.addColorStop(1,'rgba(255,170,90,.25)');c.fillStyle=g;c.fillRect(0,0,W,FT);
+    if(game.court!=='playa'){c.fillStyle='rgba(255,200,120,.9)';circle(c,W*.62,FT-165,28);c.fillStyle='rgba(255,200,120,.25)';circle(c,W*.62,FT-165,48);}c.fillStyle='rgba(255,140,60,.12)';c.fillRect(0,FT,W,H-FT);}
+  else{c.fillStyle='rgba(5,9,28,.8)';c.fillRect(0,0,W,FT);c.fillStyle='rgba(5,9,28,.5)';c.fillRect(0,FT,W,H-FT);
+    srand(99);for(let i=0;i<60;i++){c.fillStyle=`rgba(255,255,255,${.3+sr()*.5})`;c.fillRect(sr()*W,sr()*140,1.5,1.5);}
+    for(const lx of [140,620]){c.fillStyle='#2a2f3a';c.fillRect(lx,FT-230,7,230);c.fillRect(lx-4,FT-234,34,6);c.fillStyle='#fff3c4';c.fillRect(lx+20,FT-230,10,6);
+      c.globalCompositeOperation='lighter';const g=c.createRadialGradient(lx+25,FT-226,4,lx+25,FT-150,260);g.addColorStop(0,'rgba(255,220,150,.3)');g.addColorStop(1,'rgba(255,230,160,0)');c.fillStyle=g;c.fillRect(lx-240,FT-240,520,H);c.globalCompositeOperation='source-over';}}
+  c.restore();}
+function buildBG(){bgCanvas.width=Math.round(W*K);bgCanvas.height=Math.round(H*K);const b=bgCanvas.getContext('2d');b.setTransform(K,0,0,K,0,0);drawCourtBG(b,game.court);todOverlay(b);
   if(QUAL.dof&&'filter' in b){try{const t=document.createElement('canvas');t.width=bgCanvas.width;t.height=Math.round((FT-4)*K);t.getContext('2d').drawImage(bgCanvas,0,0);b.save();b.setTransform(1,0,0,1,0,0);b.filter='blur('+(1.2*K).toFixed(1)+'px)';b.drawImage(t,0,0);b.restore();b.filter='none';}catch(e){}}
   b.setTransform(K,0,0,K,0,0);drawStanchion(b,game.court);bgDirty=false;}
 function drawAmbient(c){const t=game.t;
   if(['estadio','euro','nba','gimnasio'].includes(game.court)){srand(Math.floor(t*6));for(let i=0;i<5;i++){c.fillStyle='rgba(255,255,255,.85)';circle(c,sr()*W,110+sr()*290,1.6+sr()*1.5);}}
   else if(game.court==='azotea'){srand(Math.floor(t*3)+7);for(let i=0;i<6;i++){c.fillStyle='rgba(255,212,122,.6)';c.fillRect(sr()*W,FT-200+sr()*160,8,10);}}
+  if(game.chapa){c.strokeStyle='rgba(190,210,235,.55)';c.lineWidth=1.3;srand(Math.floor(t*14));for(let i=0;i<14;i++){const x=sr()*W,y=56+((t*420+sr()*400)%(FT-60));c.beginPath();c.moveTo(x,y);c.lineTo(x,y+12);c.stroke();}}
+  if(false){}
   else if(game.court==='playa'){c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;for(let i=0;i<4;i++){const x=(i*260+t*22)%(W+80)-40;c.beginPath();c.moveTo(x,FT-22);c.quadraticCurveTo(x+20,FT-27,x+40,FT-22);c.stroke();}}}
 function rimOff(){return HOOP.flex*6*(game.players.some(p=>p.hang>0)?1:Math.cos(game.t*38));}
 function drawHoopBack(c){const bx=HOOP.boardX;
@@ -1860,6 +1889,7 @@ function drawShadow(c,p){const Lg=LIGHT[game.court]||LIGHT.club,h=p.h,s=.5,jump=
   shX.setTransform(1,0,0,1,0,0);shX.globalCompositeOperation='source-in';shX.fillStyle='#000';shX.fillRect(0,0,w2,h2);shX.globalCompositeOperation='source-over';
   const fade=Math.max(.35,1-jump/260);for(const [sx,sy,a] of Lg.sh){c.save();c.globalAlpha=a*fade;c.transform(1,0,-sx,-sy,p.x-.9*h+(HO-4)*sx,FLOOR+ZY(p.z)+(HO-4)*sy);c.drawImage(shC,0,0,w2,h2,0,0,w2/s,h2/s);c.restore();}}
 function drawLighting(c){const Lg=LIGHT[game.court]||LIGHT.club;c.save();
+  if(game.tod==='noche'&&game.court!=='azotea'){c.fillStyle='rgba(15,25,70,.2)';c.fillRect(0,0,W,H);}else if(game.tod==='atardecer'){c.fillStyle='rgba(255,140,60,.08)';c.fillRect(0,0,W,H);}
   if(Lg.tint){c.fillStyle=Lg.tint;c.fillRect(0,0,W,H);}
   if(Lg.spot||Lg.flood){c.globalCompositeOperation='lighter';const P=game.players,cx=Lg.spot&&P.length?(P[0].x+(P[1]?P[1].x:P[0].x))/2:120,cy=Lg.spot?FLOOR-60:40,R=Lg.spot?320:640;
     const g=c.createRadialGradient(cx,cy,10,cx,cy,R);g.addColorStop(0,Lg.spot?'rgba(255,250,235,.10)':'rgba(255,225,160,.10)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,W,H);c.globalCompositeOperation='source-over';}
@@ -2533,7 +2563,7 @@ const AMIGOS_ALL=[...AMIGOS,['carrizo','Conrado'],['villalba','Nacho L.'],...AMI
    const r=RIVALS[id];r.hidden=false;r.nick='Amigos · '+DIVSH[div];if(r.look.hair==='gorra')r.look.cap='#0b1830';if(r.look.hair==='vincha')r.look.band='#f6f1e4';});}
 const WCAL=['L','C','L','C','L','C','L','C','L','L','C','L','L','C','L','C'];
 
-let worldTab='temp',worldDiv=null,worldStatDiv=-1;
+let worldTab='temp',worldDiv=null,worldStatDiv=-1,palmAwS=null,statMode='temp';
 function wStats(w,id){if(id==='you')return humanStats();const b=RIVALS[id].st,d=(w.drift&&w.drift[id])||0,o={};for(const k in b)o[k]=clamp(b[k]+d,.05,.98);const J=w.inj&&w.inj[id];if(J&&J.g>0)o[J.k]=clamp(o[J.k]-J.amt,.05,.98);return o;}
 function divOf(w,id){return w.divs.findIndex(d=>d.includes(id));}
 function newWorld(mode){
@@ -2582,7 +2612,7 @@ function seriesHTML(w){const S=w.series;if(!S||S.s!==w.season)return '';let h=`<
   return h;}
 function wSim(w,a,b){return simGame(a,b,11,w.time,id=>wStats(w,id));}
 function simOm(w,id,pts){const S=wStats(w,id),f=clamp((S.three-.3)*1.1,.05,.7);return Math.max(0,Math.min(Math.floor(pts/2),Math.round(pts*f/2+randn()*.8)));}
-function wLine(w,id,pts,real){const P=w.ps[id]||(w.ps[id]={gp:0,pts:0,w:0,stl:0,blk:0,reb:0});P.gp++;P.pts+=pts;P.om=(P.om||0)+(real&&real.om!=null?real.om:simOm(w,id,pts));
+function wLine(w,id,pts,real){const P=w.ps[id]||(w.ps[id]={gp:0,pts:0,w:0,stl:0,blk:0,reb:0});P.gp++;P.pts+=pts;P.hi=Math.max(P.hi||0,pts);P.om=(P.om||0)+(real&&real.om!=null?real.om:simOm(w,id,pts));
   if(real){P.stl+=real.stl||0;P.blk+=real.blk||0;P.reb+=real.reb||0;}else{const S=wStats(w,id);P.stl+=Math.round(rand()*S.steal*4.5);P.blk+=Math.round(rand()*S.block*3.5);P.reb+=Math.round(2+rand()*(S.jump+S.close)*4);}}
 function wTab(w,d,a,b,sa,sb){const T=w.table[d],A=T[a],B=T[b];A.pj++;B.pj++;A.pf+=sa;A.pc+=sb;B.pf+=sb;B.pc+=sa;if(sa>sb){A.g++;B.p++;w.ps[a].w++;}else{B.g++;A.p++;w.ps[b].w++;}streakUpd(w,a,b,sa,sb);}
 function wStand(w,d){return Object.entries(w.table[d]).map(([id,x])=>Object.assign({id},x)).sort((x,y)=>y.g-x.g||(y.pf-y.pc)-(x.pf-x.pc)||y.pf-x.pf);}
@@ -2601,7 +2631,7 @@ function worldNext0(w){if(w.phase!=='season')return null;const ev=cal(w)[w.step]
   const R=w.cup.rounds[w.cup.r];if(!R||w.cup.champ)return {type:'C',none:true,label:'Copa Argentina'};const pr=R.pairs.find(m=>m.includes('you'));if(!pr)return {type:'C',none:true,bye:(R.byes||[]).includes('you'),label:'Copa Argentina · '+R.name};
   const opp=pr[0]==='you'?pr[1]:pr[0],od=divOf(w,opp);
   return {type:'C',opp,d:od,home:R.name==='Final'?null:(divOf(w,'you')>=od?opp:'you'),label:'Copa Argentina · '+R.name,court:R.name==='Final'?'estadio':(()=>{const ho=divOf(w,'you')>=od?opp:'you',hd=divOf(w,ho);return hd>=5?'azotea':divCourt(hd,ho);})(),diff:DIVDIFF[od]+(R.name==='Final'?.05:0)};}
-function worldAdvance(w,my){let reward=[];const ev=cal(w)[w.step];
+function worldAdvance(w,my){injDefault();let reward=[];const ev=cal(w)[w.step];
   if(my&&my.wo){const nx0=worldNext(w),O=w.out||(w.out={});const k=nx0&&nx0.wo==='me'?'you':nx0&&nx0.opp;if(k&&O[k]>0){O[k]--;if(!O[k])delete O[k];}}
   if(my&&!my.wo){const nx0=worldNext(w);if(nx0&&!nx0.none&&(nx0.type==='L'||nx0.type==='C')){const hh=w.h2h||(w.h2h={}),H=hh[nx0.opp]||(hh[nx0.opp]={lw:0,ll:0,cw:0,cl:0,pf:0,pa:0,last:[]}),won=my.s>my.o;
     if(nx0.type==='L'){if(won)H.lw++;else H.ll++;}else{if(won)H.cw++;else H.cl++;}H.pf+=my.s;H.pa+=my.o;H.last=H.last.concat((won?'G':'P')+(nx0.type==='C'?'c':'')).slice(-5);}}
@@ -2715,8 +2745,12 @@ function wInjTick(w,ev){const J=w.inj||(w.inj={});for(const id in J){J[id].g--;i
   if(news)addNews(w,`${nT(news[0])} juega tocado`,`Arrastra una molestia (${INJ_LBL[news[2]].toLowerCase()}) y va a estar disminuido las próximas dos jornadas.`,'lesion');}
 function wAwards(w,d){const ids=w.divs[d].filter(id=>w.ps[id]&&w.ps[id].gp),P=w.ps,T=w.table[d];if(!ids.length)return null;
   const ppg=k=>P[k].pts/P[k].gp,dpg=k=>(P[k].stl+P[k].blk)/P[k].gp,best=f=>ids.reduce((a,b)=>f(b)>f(a)?b:a);
-  const mvp=best(k=>T[k].g*2+ppg(k)+dpg(k)*1.2),scorer=best(k=>P[k].pts),def=best(dpg);
-  return {mvp,scorer,def,pts:P[scorer].pts,dpg:dpg(def).toFixed(1)};}
+  const mv=k=>T[k].g*2+ppg(k)+dpg(k)*1.2,mvp=best(mv),scorer=best(k=>P[k].pts),def=best(dpg),sh=best(k=>P[k].om||0),five=ids.slice().sort((a,b)=>mv(b)-mv(a)).slice(0,5);
+  const prev=k=>{const L=(w.allTime[k]&&w.allTime[k].log)||[];const q=L[L.length-1];return q&&q.s===w.season-1?q:null;},
+    imp=k=>{const q=prev(k);return (T[k].g-q.g)+(ppg(k)-(q.gp?q.pts/q.gp:0))*.6+(q.d>d?3:q.d<d?-3:0);},cand=ids.filter(prev),mip=cand.length?cand.reduce((a,b)=>imp(b)>imp(a)?b:a):null;
+  return {mvp,scorer,def,pts:P[scorer].pts,dpg:dpg(def).toFixed(1),sh,om:P[sh].om||0,five,mip};}
+const AW_LBL=[['mvp','Jugador del año'],['scorer','Máximo anotador'],['def','Mejor defensor'],['sh','Mejor tirador'],['mip','Más mejorado']];
+function awardsHTML(aw,mine){return `<div class="awgrid">${aw.map((a,d)=>a?`<div class="awc${mine===d?' me':''}"><b>${DIVS[d]}</b>${AW_LBL.filter(([k])=>a[k]).map(([k,l])=>`<div><span class="sub">${l}</span>${nm(a[k])}${k==='scorer'?` <small class="sub">${a.pts} pts</small>`:k==='sh'?` <small class="sub">${a.om} de afuera</small>`:''}</div>`).join('')}<div><span class="sub">Quinteto ideal</span>${a.five.map(nm).join(', ')}</div></div>`:'').join('')}</div>`;}
 function at(w,id){return w.allTime[id]||(w.allTime[id]={seasons:0,gp:0,pts:0,w:0,lt:0,cups:0,mvp:0,top:0,def:0,best:9});}
 function seasonGoals(w){if(w.goals&&w.goals.s===w.season)return w.goals;const d=divOf(w,'you'),ids=w.divs[d],me=ovr(wStats(w,'you')),rk=ids.filter(id=>ovr(wStats(w,id))>me).length+1;
   const L=[];if(d===0)L.push(rk<=4?{k:'top',n:2,t:'Terminar entre los 2 primeros de la NBA'}:{k:'top',n:6,t:'Entrar a los playoffs de la NBA (top 6)'});
@@ -2733,9 +2767,14 @@ function goalsHTML(w){const G=seasonGoals(w);return `<div class="goals"><b>Objet
 function endWorldSeason(w){const msgs=[];{const myD0=divOf(w,'you');if(myD0>=0){const GG=seasonGoals(w),res=GG.list.map(g=>({t:g.t,ok:goalState(w,g,true).ok}));res.forEach(r=>{if(r.ok){w.drift.you=Math.min(.3,(w.drift.you||0)+.003);msgs.push('Objetivo cumplido: '+r.t);}});
     const P=w.ps.you||{gp:0,pts:0},T=w.table[myD0].you,G=w.gst&&w.gst.s===w.season?w.gst:{};w.mySum={s:w.season,d:myD0,g:T.g,p:T.p,ppg:P.gp?(P.pts/P.gp).toFixed(1):'0',om:P.om||0,stl:P.stl||0,blk:P.blk||0,best:G.best||null,goals:res,ovr0:Math.round(ovr(humanStats())*99)};}}let g0=0;while(!w.cup.champ&&w.cup.rounds[w.cup.r]&&g0++<10)cupPlayRound(w,null);const DI=[...Array(ND).keys()],st=DI.map(d=>wStand(w,d)),aw=DI.map(d=>wAwards(w,d));const ovr0=ovr(humanStats());
   const myD=divOf(w,'you'),myPos=st[myD].findIndex(x=>x.id==='you')+1;
-  for(let d=0;d<ND;d++)for(const x of st[d]){const A=at(w,x.id),P=w.ps[x.id]||{gp:0,pts:0,w:0};A.seasons++;A.gp+=P.gp;A.pts+=P.pts;A.w+=P.w;A.best=Math.min(A.best,d);if(d===0)A.nba=(A.nba||0)+1;}
+  for(let d=0;d<ND;d++)st[d].forEach((x,pi)=>{const A=at(w,x.id),P=w.ps[x.id]||{gp:0,pts:0,w:0};A.seasons++;A.gp+=P.gp;A.pts+=P.pts;A.w+=P.w;A.best=Math.min(A.best,d);if(d===0)A.nba=(A.nba||0)+1;
+    for(const k of ['om','stl','blk','reb'])A[k]=(A[k]||0)+(P[k]||0);A.hi=Math.max(A.hi||0,P.hi||0);
+    (A.log||(A.log=[])).push({s:w.season,d,pos:pi+1,g:x.g,p:x.p,gp:P.gp||0,pts:P.pts||0,om:P.om||0,stl:P.stl||0,blk:P.blk||0,reb:P.reb||0,hi:P.hi||0,m:Math.round(ovr(wStats(w,x.id))*99),t:[]});});
+  const tagL=(id,t)=>{const L=id&&w.allTime[id]&&w.allTime[id].log;if(L&&L.length&&L[L.length-1].s===w.season)L[L.length-1].t.push(t);};
   const CH=st.map(s=>s[0].id);if(w.nbapo&&w.nbapo.s===w.season&&w.nbapo.champ)CH[0]=w.nbapo.champ;const MU=w.mundo&&w.mundo.s===w.season?w.mundo.champ:null;
-  st.forEach((s,d)=>{at(w,CH[d]).lt++;const a=aw[d];if(a){at(w,a.mvp).mvp++;at(w,a.scorer).top++;at(w,a.def).def++;}});
+  st.forEach((s,d)=>{at(w,CH[d]).lt++;tagL(CH[d],'Campeón');const a=aw[d];if(a){at(w,a.mvp).mvp++;at(w,a.scorer).top++;at(w,a.def).def++;const S=at(w,a.sh);S.sh=(S.sh||0)+1;if(a.mip){const M=at(w,a.mip);M.mip=(M.mip||0)+1;}a.five.forEach(id=>{const F=at(w,id);F.five=(F.five||0)+1;tagL(id,'Quinteto');});
+    [['mvp','MVP'],['scorer','Goleador'],['def','Defensor'],['sh','Tirador'],['mip','Más mejorado']].forEach(([k,l])=>tagL(a[k],l));}});
+  tagL(w.cup.champ,'Copa Argentina');tagL(MU,'Copa del Mundo');if(w.series&&w.series.s===w.season)tagL(w.series.champ,'Copa Series');{const AS0=w.asg&&w.asg.s===w.season?w.asg:null;if(AS0){tagL(AS0.champ,'Estrellas');tagL(AS0.triChamp,'Triples');}}
   if(w.cup.champ)at(w,w.cup.champ).cups++;
   const up=DI.map(()=>[]),down=DI.map(()=>[]);const nd=w.divs.map(()=>[]);
   for(let d=0;d<ND;d++){const ids=st[d].map(x=>x.id);let keep=ids.slice();
@@ -2752,10 +2791,10 @@ function endWorldSeason(w){const msgs=[];{const myD0=divOf(w,'you');if(myD0>=0){
   if(MU==='you')msgs.push('¡CAMPEÓN DE LA COPA DEL MUNDO!');
   if(up[myD].includes('you'))msgs.push(myD===1?'¡SUBISTE A LA NBA!':`¡Ascendiste a ${DIVS[myD-1]}!`);
   if(down[myD].includes('you'))msgs.push(`Descendiste a ${DIVS[myD+1]}.`);
-  const myAw=[];if(aw[myD]){if(aw[myD].mvp==='you')myAw.push('Jugador del año');if(aw[myD].scorer==='you')myAw.push('Máximo anotador');if(aw[myD].def==='you')myAw.push('Mejor defensor');}
+  const myAw=[];if(aw[myD]){if(aw[myD].mvp==='you')myAw.push('Jugador del año');if(aw[myD].scorer==='you')myAw.push('Máximo anotador');if(aw[myD].def==='you')myAw.push('Mejor defensor');if(aw[myD].sh==='you')myAw.push('Mejor tirador');if(aw[myD].mip==='you')myAw.push('Más mejorado');if(aw[myD].five.includes('you'))myAw.push('Quinteto ideal');}
   if(myAw.length){msgs.push('Premios: '+myAw.join(', '));const A=save.awards||(save.awards={});myAw.forEach(m=>{const k=m==='Jugador del año'?'MVP':m;A[k]=(A[k]||0)+1;});}
   const AS=w.asg&&w.asg.s===w.season?w.asg:null;
-  w.history.push({s:w.season,series:w.series&&w.series.s===w.season?w.series.champ:null,promo:promoRes,asg:AS&&AS.champ||null,tri:AS&&AS.triChamp||null,triPts:AS&&AS.triChamp?(triRank(AS)[0]||[])[1]:null,asgF:AS&&AS.final&&AS.final.r?[AS.final.a,AS.final.b,AS.final.r]:null,champ:CH.slice(),mundo:MU,cup:w.cup.champ,mvp:aw.map(a=>a&&a.mvp),top:aw.map(a=>a&&[a.scorer,a.pts]),def:aw.map(a=>a&&a.def),
+  w.history.push({s:w.season,series:w.series&&w.series.s===w.season?w.series.champ:null,promo:promoRes,asg:AS&&AS.champ||null,tri:AS&&AS.triChamp||null,triPts:AS&&AS.triChamp?(triRank(AS)[0]||[])[1]:null,asgF:AS&&AS.final&&AS.final.r?[AS.final.a,AS.final.b,AS.final.r]:null,champ:CH.slice(),mundo:MU,cup:w.cup.champ,mvp:aw.map(a=>a&&a.mvp),top:aw.map(a=>a&&[a.scorer,a.pts]),def:aw.map(a=>a&&a.def),sh:aw.map(a=>a&&[a.sh,a.om]),mip:aw.map(a=>a&&a.mip),five:aw.map(a=>a&&a.five),
     up:up.map(x=>x.slice()),down:down.map(x=>x.slice()),you:{d:myD,pos:myPos,cup:w.myCupStage,aw:myAw.join(', '),media:Math.round(ovr0*99),titles:[CH[myD]==='you'?(myD===0?'NBA':DIVSH[myD]):'',w.cup.champ==='you'?'Copa':'',MU==='you'?'Mundo':''].filter(Boolean)}});
   w.summary={st:st.map(s=>s.map(x=>x.id)),champs:CH.slice(),mundo:MU,aw,up,down,msgs,myD,myPos,promo:promoRes};
   w.prevRank=st.map(s=>s.map(x=>x.id));w.nextDivs=nd;w.phase='done';
@@ -2791,13 +2830,15 @@ function renderWorld(){const body=$('#wdBody'),w=save.world;if(w&&w.divs)storyCh
   else if(worldTab==='tablas')h+=`<div class="row" id="wdDivs" style="margin:10px 0"></div>`+wTableHTML(w,worldDiv);
   else if(worldTab==='copa')h+=wCupHTML(w);
   else if(worldTab==='diario')h+=wDiarioHTML(w);
-  else if(worldTab==='stats')h+=`<div class="row" id="wdSDiv" style="margin:10px 0"></div>`+wStatsHTML(w);
+  else if(worldTab==='stats')h+=`<div class="row" id="wdSMode" style="margin:10px 0 0"></div><div class="row" id="wdSDiv" style="margin:10px 0"></div>`+(statMode==='hist'?wHistStatsHTML(w):wStatsHTML(w));
   else if(worldTab==='amigos')h+=wAmigosHTML(w);
   else h+=wPalmHTML(w);
   if(worldTab==='temp')h+=`<div class="row" style="margin-top:16px"><button class="chip" id="wdQuit">Borrar esta carrera</button><span class="sub" id="wdQuitMsg"></span></div>`;
   body.innerHTML=h;
   chipRow($('#wdTabs'),tabs,worldTab,v=>{worldTab=v;renderWorld();});
   if($('#wdDivs'))chipRow($('#wdDivs'),DIVSH.map((n,i)=>[i,n]),worldDiv,v=>{worldDiv=v;renderWorld();});
+  if($('#wdAwS')){const ss=w.history.filter(x=>x.five).map(x=>x.s).reverse();chipRow($('#wdAwS'),ss.map(x=>[x,'T'+x]),palmAwS||ss[0],v=>{palmAwS=v;renderWorld();});}
+  if($('#wdSMode'))chipRow($('#wdSMode'),[['temp','Esta temporada'],['hist','Histórico']],statMode,v=>{statMode=v;renderWorld();});
   if($('#wdSDiv'))chipRow($('#wdSDiv'),[[-1,'Todas'],...DIVSH.map((n,i)=>[i,n])],worldStatDiv,v=>{worldStatDiv=v;renderWorld();});
   const nx=worldNext(w),box=body.querySelector('#lgNext');
   if(box&&nx&&!nx.none){const r=RIVALS[nx.opp];box.appendChild(portrait(r.look));const d=document.createElement('div');d.style.minWidth='0';
@@ -2809,7 +2850,7 @@ function renderWorld(){const body=$('#wdBody'),w=save.world;if(w&&w.divs)storyCh
     if(!nx.wo){const tb=save.trainBuff&&save.trainBuff.s===w.season&&save.trainBuff.step===w.step;const tr=document.createElement('button');tr.className='chip';tr.textContent=tb?'✓ En ritmo':(save.trainTry&&save.trainTry.s===w.season&&save.trainTry.step===w.step?'Ya entrenaste':'Entrenar');tr.title='Práctica de tiro opcional: si metés 4 de 6, llegás en ritmo al partido';tr.disabled=!!(tb||(save.trainTry&&save.trainTry.s===w.season&&save.trainTry.step===w.step));tr.onclick=()=>{save.trainTry={s:w.season,step:w.step};persist();startTri({train:true,court:nx.court});};box.appendChild(tr);}
     if(!nx.wo){const sb=document.createElement('button');sb.className='chip';sb.textContent='Simular';sb.title='Se juega solo según tu nivel (un poco más difícil que jugándolo)';sb.onclick=()=>{const r=simMyMatch(w,nx);toast(r.length>60?'Partido simulado':r);w.lastSim=r;renderWorld();};box.appendChild(sb);}
     {const chips=[...box.querySelectorAll(':scope>.chip')];if(chips.length){const cr=document.createElement('div');cr.className='row';cr.style.cssText='gap:8px;grid-column:1/-1;margin-top:6px';chips.forEach(x=>cr.appendChild(x));box.appendChild(cr);}}}
-  const sk=$('#wdSkip');if(sk)sk.onclick=()=>{w.load=Math.max(0,(w.load||0)-1);worldAdvance(w,null);renderWorld();};
+  wireInj(renderWorld);const sk=$('#wdSkip');if(sk)sk.onclick=()=>{w.load=Math.max(0,(w.load||0)-1);worldAdvance(w,null);renderWorld();};
   if($('#wdNS')){const ss=[...new Set((w.news||[]).map(n=>n.s))].sort((a,b)=>b-a);chipRow($('#wdNS'),ss.map(x=>[x,'Temporada '+x]),newsSeasonSel||ss[0],v=>{newsSeasonSel=v;renderWorld();});}
   const at1=$('#asgTri');if(at1)at1.onclick=()=>startTri({asg:true});
   const ap=$('#asgPlay');if(ap)ap.onclick=()=>{const opp=ap.dataset.opp;startMatch({rival:opp,court:'playa',target:11,time:w.time,rule:'cambio',diff:DIVDIFF[divOf(w,opp)]+.04+((w.drift[opp]||0)/.07),world:true,asg:true,stageLabel:'Juego de las Estrellas · '+ap.dataset.round});};
@@ -2828,13 +2869,14 @@ function worldMatchCfg(w,nx){const cl=isClasico(w,nx.opp),pv=!!(save.provoke||{}
 function lastVs(w,opp){let b=null;for(const k in (w.myRes||{})){const r=w.myRes[k];if(r.o!==opp)continue;const [se,st]=k.split(':').map(Number);if(!b||se>b.season||(se===b.season&&st>b.step))b={s:r.s,r:r.r,season:se,step:st};}return b;}
 function legsTxt(w){const l=w.load||0;return l>=5?'Muy cargadas':l>=4?'Cargadas':l>=2?'Normales':'Frescas';}
 function resList(res){return `<div class="results">${res.map(r=>{const aw=r.sa>r.sb;return `<div><span class="${aw?'w':'lo'}">${nm(r.a)}</span><span>${r.sa} – ${r.sb}</span><span class="${aw?'lo':'w'}">${nm(r.b)}</span></div>`;}).join('')}</div>`;}
-function wTempHTML(w,myD){let h='';
+function wTempHTML(w,myD){let h=w.phase==='season'?injChoiceHTML():'';
   const st=wStand(w,myD),pos=st.findIndex(x=>x.id==='you')+1;
   if(w.phase==='done'){const S=w.summary;
     h+=`<div class="champ"><span class="sub">Fin de la temporada ${w.season}</span><b>${pos}º en ${DIVSH[S.myD]}</b><span>Copa Argentina: ${w.myCupStage==='Campeón'?'¡Campeón!':'llegaste hasta '+w.myCupStage}</span></div>`;
     if(S.msgs.length)h+=`<p class="reward">${S.msgs.join(' · ')}</p>`;
     h+=mySumHTML(w);
     h+=`<h3>Campeones</h3><div class="tiles">${(S.champs||S.st.map(s=>s[0])).map((c,d)=>`<div><span>${DIVS[d]}</span><b>${nm(c)}</b></div>`).join('')}${S.mundo?`<div><span>Copa del Mundo</span><b>${nm(S.mundo)}</b></div>`:''}<div><span>Copa Argentina</span><b>${nm(w.cup.champ)}</b></div><div><span>Jugador del año</span><b>${S.aw[0]?nm(S.aw[0].mvp):'—'}</b></div></div>`;
+    h+=`<h3>Premios de la temporada</h3>`+awardsHTML(S.aw,S.myD);
     h+=`<h3>Ascensos y descensos</h3><div class="results">${DIVS.slice(1).map((_,i)=>i+1).map(d=>`<div><span class="w">Suben a ${DIVSH[d-1]}: ${S.up[d].map(nm).join(', ')}</span></div><div><span class="lo">Bajan a ${DIVSH[d]}: ${S.down[d-1].map(nm).join(', ')}</span></div>`).join('')}</div>`;
     if(S.promo&&S.promo.length)h+=`<h3>Promociones</h3><div class="results">${S.promo.map(x=>`<div><span class="${x.win===x.a?'w':'lo'}">${nm(x.a)} <small class="sub">${DIVSH[x.d]}</small></span><span>${x.wa} – ${x.wb}</span><span class="${x.win===x.b?'w':'lo'}">${nm(x.b)} <small class="sub">${DIVSH[x.d-1]}</small></span></div>`).join('')}</div>`;
     h+=`<div class="row" style="margin-top:14px"><button class="btn primary" id="wdNew">Empezar temporada ${w.season+1}</button></div>`;return h;}
@@ -2872,16 +2914,24 @@ function wCupHTML(w){let h=`<p class="sub">Eliminación directa a partido único
       if(!x)return `<div${st}><span>${nm(a)} <small class="sub">${DIVSH[divOf(w,a)]}</small></span><span>vs</span><span>${nm(b)} <small class="sub">${DIVSH[divOf(w,b)]}</small></span></div>`;
       const aw=x[0]>x[1];return `<div${st}><span class="${aw?'w':'lo'}">${nm(a)}</span><span>${x[0]} – ${x[1]}</span><span class="${aw?'lo':'w'}">${nm(b)}</span></div>`;}).join('')}</div>`+((R.byes||[]).length?`<p class="sub" style="font-size:13px;margin:4px 0">Pase directo: ${R.byes.map(nm).join(', ')}</p>`:'');}
   return h;}
+function wHistStatsHTML(w){const ids=Object.keys(w.allTime).filter(id=>(id==='you'||RIVALS[id])&&(worldStatDiv<0||divOf(w,id)===worldStatDiv));
+  if(!ids.length&&!Object.keys(w.ps).length)return '<p class="sub">Todavía no hay historia.</p>';
+  const all=new Set([...ids,...Object.keys(w.ps).filter(id=>worldStatDiv<0||divOf(w,id)===worldStatDiv)]),T=id=>{const A=w.allTime[id]||{},P=w.phase==='season'?(w.ps[id]||{}):{};const o={};for(const k of ['gp','pts','w','om','stl','blk','reb'])o[k]=(A[k]||0)+(P[k]||0);o.lt=A.lt||0;o.mvp=A.mvp||0;o.cups=A.cups||0;o.hi=Math.max(A.hi||0,P.hi||0);return o;};
+  const C={};all.forEach(id=>C[id]=T(id));const L=[...all];
+  const board=(title,f,fmt)=>{const top=L.filter(id=>C[id].gp).sort((a,b)=>f(b)-f(a)).slice(0,8);return `<div class="board"><h4>${title}</h4>${top.map((id,i)=>`<div class="${id==='you'?'me':''}"><span>${i+1}. ${nm(id)} <small class="sub">${divOf(w,id)>=0?DIVSH[divOf(w,id)]:''}</small></span><b>${fmt(f(id))}</b></div>`).join('')}</div>`;};
+  const one=v=>v.toFixed(1).replace('.',','),n=v=>v;
+  return `<p class="sub">Toda la carrera, incluida la temporada en curso (fase regular de liga).</p><div class="boards">${board('Puntos',id=>C[id].pts,n)}${board('Partidos ganados',id=>C[id].w,n)}${board('Dobles de afuera',id=>C[id].om,n)}${board('Robos',id=>C[id].stl,n)}${board('Tapones',id=>C[id].blk,n)}${board('Rebotes',id=>C[id].reb,n)}${board('Puntos por partido (mín. 20 PJ)',id=>C[id].gp>=20?C[id].pts/C[id].gp:0,one)}${board('Más puntos en un partido',id=>C[id].hi,n)}${board('Ligas ganadas',id=>C[id].lt,n)}${board('Jugador del año',id=>C[id].mvp,n)}${board('Copas Argentina',id=>C[id].cups,n)}</div>`;}
 function wStatsHTML(w){const ids=Object.keys(w.ps).filter(id=>worldStatDiv<0||divOf(w,id)===worldStatDiv);
   if(!ids.length)return '<p class="sub">Todavía no se jugó ninguna fecha.</p>';const P=w.ps;
   const board=(title,f,fmt)=>{const top=ids.filter(id=>P[id].gp).sort((a,b)=>f(b)-f(a)).slice(0,8);
     return `<div class="board"><h4>${title}</h4>${top.map((id,i)=>`<div class="${id==='you'?'me':''}"><span>${i+1}. ${nm(id)} <small class="sub">${DIVSH[divOf(w,id)]}</small></span><b>${fmt(f(id))}</b></div>`).join('')}</div>`;};
   const one=v=>v.toFixed(1).replace('.',',');
-  return `<p class="sub">Números de la fase regular de la temporada ${w.season}.</p><div class="boards">${board('Puntos',id=>P[id].pts,v=>v)}${board('Puntos por partido',id=>P[id].pts/P[id].gp,one)}${board('Robos',id=>P[id].stl,v=>v)}${board('Tapones',id=>P[id].blk,v=>v)}${board('Rebotes',id=>P[id].reb,v=>v)}${board('Victorias',id=>P[id].w,v=>v)}</div>`;}
+  return `<p class="sub">Números de la fase regular de la temporada ${w.season}.</p><div class="boards">${board('Puntos',id=>P[id].pts,v=>v)}${board('Puntos por partido',id=>P[id].pts/P[id].gp,one)}${board('Robos',id=>P[id].stl,v=>v)}${board('Tapones',id=>P[id].blk,v=>v)}${board('Rebotes',id=>P[id].reb,v=>v)}${board('Victorias',id=>P[id].w,v=>v)}${board('Dobles de afuera',id=>P[id].om||0,v=>v)}${board('Más puntos en un partido',id=>P[id].hi||0,v=>v)}</div>`;}
 function wPalmHTML(w){let h=`<h3>Tu evolución</h3>`+evoSVG(w);
   if(!w.history.length)h+='<p class="sub">El palmarés se llena al terminar la primera temporada.</p>';
   else{h+=`<h3>Campeones por temporada</h3><div class="tblwrap"><table><thead><tr><th>Temp.</th>${DIVSH.map(x=>`<th class="l">${x}</th>`).join('')}<th class="l">Copa Argentina</th><th class="l">MVP NBA</th><th class="l">Goleador</th></tr></thead><tbody>${
       w.history.slice().reverse().map(x=>`<tr><td>${x.s}</td>${x.champ.map(c=>`<td class="l${c==='you'?' mecell':''}">${nm(c)}</td>`).join('')}<td class="l${x.cup==='you'?' mecell':''}">${nm(x.cup)}</td><td class="l">${x.mvp[0]?nm(x.mvp[0]):'—'}</td><td class="l">${x.top[0]?nm(x.top[0][0])+' ('+x.top[0][1]+')':'—'}</td></tr>`).join('')}</tbody></table></div>`;
+    {const H=w.history,sel=H.find(x=>x.s===palmAwS)||H[H.length-1];if(sel&&sel.five){h+=`<h3>Premios por temporada</h3><div class="row" id="wdAwS" style="margin:6px 0"></div>`+awardsHTML(sel.mvp.map((m,d)=>m?{mvp:m,scorer:sel.top[d]&&sel.top[d][0],pts:sel.top[d]&&sel.top[d][1],def:sel.def[d],sh:sel.sh[d]&&sel.sh[d][0],om:sel.sh[d]&&sel.sh[d][1],mip:sel.mip[d],five:sel.five[d]||[]}:null),sel.you?sel.you.d:-1);}}
     {const R=w.recs||{},L=[['pts','Más puntos en un partido'],['margin','Mayor paliza (diferencia)'],['box_blk','Más tapones en un partido'],['box_stl','Más robos en un partido'],['box_reb','Más rebotes en un partido'],['box_dnk','Más volcadas en un partido'],['box_om','Más dobles de afuera en un partido']].filter(([k])=>R[k]);
       if(L.length||(R.perfect||[]).length)h+=`<h3>Récords de la carrera</h3><div class="results">${L.map(([k,t])=>`<div><span>${t}</span><span><b style="color:var(--paint)">${R[k].v}</b> · ${nm(R[k].id)} <small class="sub">vs ${nm(R[k].opp)}, T${R[k].s}</small></span></div>`).join('')}${(R.perfect||[]).length?`<div><span>Partidos perfectos (11-0)</span><span>${R.perfect.slice(-5).map(x=>nm(x.id)+' <small class="sub">T'+x.s+'</small>').join(', ')}</span></div>`:''}</div>`;
       const CL=Object.entries(w.riv||{}).filter(([id,v])=>v>=10&&RIVALS[id]).sort((a,b)=>b[1]-a[1]);if(CL.length)h+=`<p class="sub" style="font-size:14px">Tus clásicos: ${CL.map(([id])=>nm(id)).join(' · ')}</p>`;}
@@ -3092,6 +3142,14 @@ function worldTitles(w,id){const t={lig:DIVS.map(()=>[]),cup:[],asg:[],tri:[],mu
   if(id==='you'&&save.archW){const A=save.archW;(A.lig||[]).forEach((s,d)=>{if(t.lig[d])t.lig[d].push(...s);});['cup','asg','tri','mundo'].forEach(k=>t[k].push(...(A[k]||[])));}
   if(!w)return t;
   w.history.forEach(x=>{if(x.mundo===id)t.mundo.push(x.s);x.champ.forEach((c,d)=>{if(c===id)t.lig[d].push(x.s);});if(x.cup===id)t.cup.push(x.s);if(x.asg===id)t.asg.push(x.s);if(x.tri===id)t.tri.push(x.s);});return t;}
+function careerHTML(w,id){const A=w.allTime[id],L=(A&&A.log)||[],d0=divOf(w,id);
+  const cur=d0>=0&&w.phase==='season'&&w.ps[id]&&w.ps[id].gp?(()=>{const T=w.table[d0][id],P=w.ps[id];return {s:w.season,d:d0,pos:wStand(w,d0).findIndex(x=>x.id===id)+1,g:T.g,p:T.p,gp:P.gp,pts:P.pts,om:P.om||0,stl:P.stl,blk:P.blk,reb:P.reb,hi:P.hi||0,m:Math.round(ovr(wStats(w,id))*99),t:['en curso'],live:true};})():null;
+  const rows=[...L,...(cur?[cur]:[])];if(!rows.length)return '';
+  const tot=rows.reduce((o,r)=>{for(const k of ['g','p','gp','pts','om','stl','blk','reb'])o[k]+=r[k]||0;o.hi=Math.max(o.hi,r.hi||0);return o;},{g:0,p:0,gp:0,pts:0,om:0,stl:0,blk:0,reb:0,hi:0});
+  const f=(a,b)=>b?(a/b).toFixed(1).replace('.',','):'—',bestS=rows.reduce((a,r)=>!a||r.d<a.d||(r.d===a.d&&r.pos<a.pos)?r:a,null);
+  let h=`<h3>Estadísticas de carrera</h3><p class="sub" style="font-size:13px;margin:0 0 6px">Fase regular de liga. Entre paréntesis, el promedio por partido.</p><div class="tiles"><div><span>Temporadas</span><b>${rows.length}</b></div><div><span>Partidos</span><b>${tot.gp}</b></div><div><span>Récord</span><b>${tot.g}-${tot.p} (${tot.g+tot.p?Math.round(tot.g/(tot.g+tot.p)*100):0}%)</b></div><div><span>Puntos</span><b>${tot.pts} (${f(tot.pts,tot.gp)})</b></div><div><span>Dobles de afuera</span><b>${tot.om} (${f(tot.om,tot.gp)})</b></div><div><span>Robos</span><b>${tot.stl} (${f(tot.stl,tot.gp)})</b></div><div><span>Tapones</span><b>${tot.blk} (${f(tot.blk,tot.gp)})</b></div><div><span>Rebotes</span><b>${tot.reb} (${f(tot.reb,tot.gp)})</b></div><div><span>Récord en un partido</span><b>${tot.hi} pts</b></div><div><span>Mejor temporada</span><b>${bestS?bestS.pos+'º en '+DIVSH[bestS.d]+' (T'+bestS.s+')':'—'}</b></div></div>`;
+  h+=`<h3>Temporada por temporada</h3><div class="tblwrap"><table><thead><tr><th>Temp.</th><th class="l">Liga</th><th>Pos</th><th>G-P</th><th>PJ</th><th>Pts</th><th>PPP</th><th>Afuera</th><th>Rob</th><th>Tap</th><th>Reb</th><th>Máx</th><th>Media</th><th class="l">Logros</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td${r.live?' class="mecell"':''}>${r.s}</td><td class="l">${DIVSH[r.d]}</td><td>${r.pos}º</td><td>${r.g}-${r.p}</td><td>${r.gp}</td><td>${r.pts}</td><td>${f(r.pts,r.gp)}</td><td>${r.om}</td><td>${r.stl}</td><td>${r.blk}</td><td>${r.reb}</td><td>${r.hi}</td><td>${r.m}</td><td class="l">${(r.t||[]).join(', ')||'—'}</td></tr>`).join('')}</tbody></table></div>`;
+  return h;}
 function openCard(id){if(id!=='you'&&!RIVALS[id])return;const w=save.world,r=RIVALS[id],me=id==='you',E=hofOf(id);
   const look=me?humanLook():r.look,inW=w&&divOf(w,id)>=0,st=inW?wStats(w,id):me?humanStats():r.st,o=ovr(st);
   let h=`<div class="pchead"><span id="pcPort"></span><div style="min-width:0"><div class="nm">${teamName(id)}</div><div class="sub">${me?ARCH[save.arch].name+' · '+(save.age||22)+' años':(r.nick+' · '+TIERS[r.tier].name)} · ${look.hm.toFixed(2).replace('.',',')} m</div>
@@ -3106,7 +3164,8 @@ function openCard(id){if(id!=='you'&&!RIVALS[id])return;const w=save.world,r=RIV
   h+=`<div class="bars">${bars.map(([l,v])=>`<div class="bar">${l}<i style="--v:${Math.round(v*100)}%"></i><span>${Math.round(v*99)}</span></div>`).join('')}</div>`;
   if(w){const d=divOf(w,id),A=w.allTime[id],P=w.ps[id],T=worldTitles(w,id);
     if(d>=0){const pos=wStand(w,d).findIndex(x=>x.id===id)+1,tb=w.table[d][id];h+=`<h3>Carrera · Temporada ${w.season}</h3><div class="tiles"><div><span>División</span><b>${DIVSH[d]}</b></div><div><span>Puesto</span><b>${pos}º (${tb.g}-${tb.p})</b></div><div><span>Puntos x partido</span><b>${P&&P.gp?(P.pts/P.gp).toFixed(1).replace('.',','):'—'}</b></div><div><span>Racha</span><b>${(w.stk||{})[id]>0?w.stk[id]+' ganados':(w.stk||{})[id]<0?(-w.stk[id])+' perdidos':'—'}</b></div></div>`;}
-    if(A){h+=`<h3>Historia en la liga</h3><div class="tiles"><div><span>Temporadas</span><b>${A.seasons}</b></div><div><span>Puntos</span><b>${A.pts}</b></div><div><span>Victorias</span><b>${A.w}</b></div><div><span>Ligas</span><b>${A.lt}</b></div><div><span>Copas Argentina</span><b>${A.cups}</b></div><div><span>Jugador del año</span><b>${A.mvp}</b></div><div><span>Goleador</span><b>${A.top}</b></div><div><span>Mejor defensor</span><b>${A.def}</b></div><div><span>Estrellas / Triples</span><b>${A.asg||0} / ${A.tri||0}</b></div></div>`;}
+    if(A){h+=`<h3>Historia en la liga</h3><div class="tiles"><div><span>Temporadas</span><b>${A.seasons}</b></div><div><span>Puntos</span><b>${A.pts}</b></div><div><span>Victorias</span><b>${A.w}</b></div><div><span>Ligas</span><b>${A.lt}</b></div><div><span>Copas Argentina</span><b>${A.cups}</b></div><div><span>Jugador del año</span><b>${A.mvp}</b></div><div><span>Goleador</span><b>${A.top}</b></div><div><span>Mejor defensor</span><b>${A.def}</b></div><div><span>Estrellas / Triples</span><b>${A.asg||0} / ${A.tri||0}</b></div><div><span>Mejor tirador</span><b>${A.sh||0}</b></div><div><span>Más mejorado</span><b>${A.mip||0}</b></div><div><span>Quinteto ideal</span><b>${A.five||0}</b></div><div><span>Copas del Mundo</span><b>${A.mundo||0}</b></div>${A.series?`<div><span>Copas Series</span><b>${A.series}</b></div>`:''}</div>`;}
+    h+=careerHTML(w,id);
     const ttl=[...T.lig.map((s,d)=>s.length?`Campeón de ${DIVSH[d]} (T${s.join(', T')})`:'' ),T.cup.length?`Copa Argentina (T${T.cup.join(', T')})`:'',T.asg.length?`Juego de las Estrellas (T${T.asg.join(', T')})`:'',T.tri.length?`Concurso de triples (T${T.tri.join(', T')})`:''].filter(Boolean);
     if(ttl.length)h+=`<p><b style="color:var(--paint)">Títulos:</b> ${ttl.join(' · ')}</p>`;
   }
@@ -3137,6 +3196,9 @@ function trophies(){const L=[],w=save.world,T=worldTitles(w,'you'),C=save.career
   add('medal','#ffd23f','Jugador del año',A.MVP||0,'','El mejor de una temporada');
   add('medal','#d6dee8','Máximo anotador',A['Máximo anotador']||0,'','El que más puntos mete');
   add('medal','#e0a070','Mejor defensor',A['Mejor defensor']||0,'','Más robos y tapones por partido');
+  add('medal','#f26a1e','Mejor tirador',A['Mejor tirador']||0,'','El que más dobles de afuera mete en su liga');
+  add('medal','#3ddc84','Más mejorado',A['Más mejorado']||0,'','El que más creció de una temporada a la otra');
+  add('star','#75aadb','Quinteto ideal',A['Quinteto ideal']||0,'','Estar entre los 5 mejores de tu liga');
   {const nbaS=(w?w.history.filter(x=>x.you&&x.you.d===0).length+(w.divs[0].includes('you')&&w.phase==='season'?1:0):0)+((save.archW&&save.archW.nbaS)||0);add('star','#c9a2ff','Jugar en la NBA',nbaS,nbaS?nbaS+(nbaS>1?' temporadas':' temporada'):'','Ascendé desde la Euroliga');}
   TOURNEYS.forEach(t=>add('cup','#3ddc84',t.name,save.titles.includes(t.id)?1:0,'','Copa desafío (en Más)'));
   return L;}
@@ -3146,8 +3208,8 @@ function renderTrophy(){const tabs=[['vit','Mi vitrina'],['est','Estadísticas']
   else if(trTab==='vit'){$('#trTitle').textContent='Vitrina';const L=trophies(),won=L.filter(t=>t.n).length;
     h+=`<p class="sub">${teamName('you')} · ${save.age||22} años · ${won} de ${L.length} trofeos distintos ganados.</p><div class="vitrina">${L.map(t=>`<div class="troph ${t.n?'':'off'}">${t.n>1?`<span class="n">×${t.n}</span>`:''}${tSVG(t.kind,t.col)}<b>${t.name}</b><small>${t.n?(t.detail||(t.n===1?'Ganado':'')):t.hint}</small></div>`).join('')}</div>`;}
   else{$('#trTitle').textContent='Salón de la Fama';const H=save.hof||[];
-    h+=`<p class="sub">Cuando tu jugador se retira, su carrera queda acá para siempre. Con 30 puntos de legado o más entra al Salón de la Fama. Además podés jugar contra él en Partido rápido.</p>`;
-    h+=H.length?H.slice().reverse().map(e=>`<div class="hofc"><span data-port="${e.rid}"></span><div style="min-width:0"><div class="nm"><span class="pl" data-pid="${e.rid}">${e.name}</span></div><div class="sub" style="font-size:13px">${e.verdict} · retirado a los ${e.age} · ${e.sum}</div></div><div class="lg">${e.legacy}<small>LEGADO</small></div></div>`).join(''):'<p class="sub"><b>Todavía no hay leyendas tuyas.</b> Desde los 33 años podés retirarte en Mi jugador.</p>';
+    h+=`<p class="sub">Los más grandes de tu carrera: títulos, copas, premios y puntos suman legado. Con 30 puntos se entra.</p>`;
+    h+=H.length?H.slice().reverse().map(e=>`<div class="hofc"><span data-port="${e.rid}"></span><div style="min-width:0"><div class="nm"><span class="pl" data-pid="${e.rid}">${e.name}</span></div><div class="sub" style="font-size:13px">${e.verdict} · retirado a los ${e.age} · ${e.sum}</div></div><div class="lg">${e.legacy}<small>LEGADO</small></div></div>`).join(''):'';
     const w=save.world;if(w&&w.history.length){const sc={};w.history.forEach(x=>{x.champ.forEach((c,d)=>{sc[c]=(sc[c]||0)+(DIVW[d]||0);});if(x.cup)sc[x.cup]=(sc[x.cup]||0)+6;if(x.mundo)sc[x.mundo]=(sc[x.mundo]||0)+10;if(x.asg)sc[x.asg]=(sc[x.asg]||0)+2;if(x.mvp[0])sc[x.mvp[0]]=(sc[x.mvp[0]]||0)+4;});
       for(const id in w.allTime)sc[id]=(sc[id]||0)+Math.floor(w.allTime[id].pts/60);
       const top=Object.entries(sc).filter(([id,v])=>v>=30&&(id==='you'||RIVALS[id])).sort((a,b)=>b[1]-a[1]).slice(0,12);
@@ -3425,10 +3487,11 @@ let resetArm=false;$('#pReset').addEventListener('click',()=>{if(!resetArm){rese
 let lastMatch=null;
 const OPEN_COURTS=['plaza','playa','azotea','potrero'];
 const REFS=[['Pablo Estévez','estricto',1.6,'cobra todo'],['Marina Quiroga','estricto',1.45,'no deja pasar una'],['Hugo Benítez','permisivo',.5,'deja pegar'],['Raúl "Tano" Ferri','permisivo',.6,'casi no cobra'],['Lucía Medina','normal',1,'pareja'],['Jorge Paz','normal',1,'de la vieja escuela']];
-function startMatch(cfg){if(cfg.rain==null)cfg.rain=OPEN_COURTS.includes(cfg.court)&&rand()<.3;if(cfg.ref==null)cfg.ref=Math.floor(rand()*REFS.length);lastMatch=cfg;audioInit();const me=humanCfg();const rv=rivalCfg(cfg.rival,cfg.diff||0,me.look.jersey);
+const TOD_OPTS={potrero:['dia','atardecer'],plaza:['dia','atardecer','noche'],playa:['dia','atardecer'],azotea:['noche']},TOD_LBL={dia:'de día',atardecer:'al atardecer',noche:'de noche'};
+function startMatch(cfg){if(cfg.world)injDefault();if(cfg.rain==null)cfg.rain=OPEN_COURTS.includes(cfg.court)&&rand()<.3;if(cfg.tod==null){const T=TOD_OPTS[cfg.court];cfg.tod=T?T[Math.floor(rand()*T.length)]:null;}if(cfg.chapa==null)cfg.chapa=cfg.court==='playon'&&rand()<.4;if(cfg.ref==null)cfg.ref=Math.floor(rand()*REFS.length);lastMatch=cfg;audioInit();const me=humanCfg();const rv=rivalCfg(cfg.rival,cfg.diff||0,me.look.jersey);
   setupMatch(me,rv,Object.assign({mode:'match'},cfg));game.paused=true;hideScreens();
   const r=RIVALS[cfg.rival];$('#vsL').textContent=me.name;$('#vsLnk').textContent=ARCH[save.arch].name;$('#vsR').textContent=r.name;$('#vsRnk').textContent=r.nick+(((save.nem||{})[cfg.rival]||0)>=2?' · TU BESTIA NEGRA':'');
-  $('#vsStage').textContent=(cfg.clasico?'⚔ CLÁSICO · ':'')+(cfg.stageLabel||'')+(cfg.home==='you'?' · de local':cfg.home?' · de visitante':'')+' · a 11 o 2 minutos';$('#vsCourt').textContent=COURTS[cfg.court].name+(cfg.rain?' · 🌧 LLUEVE: la pelota resbala':'')+' · Árbitro: '+REFS[cfg.ref][0]+' ('+REFS[cfg.ref][3]+')';$('#vsH2H').textContent=h2hShort(cfg.rival,cfg.world?save.world:null)+(save.injury&&save.injury.games>0?' · Jugás con molestias ('+INJ_LBL[save.injury.k]+')':'');
+  $('#vsStage').textContent=(cfg.clasico?'⚔ CLÁSICO · ':'')+(cfg.stageLabel||'')+(cfg.home==='you'?' · de local':cfg.home?' · de visitante':'')+' · a 11 o 2 minutos';$('#vsCourt').textContent=COURTS[cfg.court].name+(cfg.tod&&cfg.tod!=='dia'?' · '+TOD_LBL[cfg.tod]:'')+(cfg.rain?' · 🌧 LLUEVE: la pelota resbala':'')+(cfg.chapa?' · 🌧 llueve sobre la chapa (bajo techo no afecta)':'')+' · Árbitro: '+REFS[cfg.ref][0]+' ('+REFS[cfg.ref][3]+')';$('#vsH2H').textContent=h2hShort(cfg.rival,cfg.world?save.world:null)+(save.injury&&save.injury.games>0?' · Jugás con molestias ('+INJ_LBL[save.injury.k]+')':'');
   {const PL=game.players[1]&&game.players[1].plan,el=$('#vsPlan');if(PL&&PL.lines.length){el.innerHTML=PL.lines.map(x=>`<p>${x}</p>`).join('');el.hidden=false;}else el.hidden=true;}
   $('#s-vs').hidden=false;setMatchUI(false);const vsT=$('#vsPlan').hidden?2300:2300+Math.min(3,game.players[1].plan.lines.length)*900;
   const tok=game.vsTok=(game.vsTok||0)+1;const go=()=>{if(tok!==game.vsTok||$('#s-vs').hidden)return;$('#s-vs').hidden=true;if(game.mode==='match'&&!game.over){game.paused=false;setMatchUI(true);}};
@@ -3458,10 +3521,13 @@ function showResult(won){setMatchUI(false);const cfg=game.cfg,[a,b]=game.players
   if(won){if(wasNem){nemMsg=`¡Te sacaste de encima a tu bestia negra!`;}NS[cfg.rival]=0;}
   else{NS[cfg.rival]=(NS[cfg.rival]||0)+1;if(NS[cfg.rival]===2)nemMsg=`${RIVALS[cfg.rival].name} te ganó dos seguidas: ahora es tu bestia negra.`;}
   let injMsg='';const IJ=save.injury;
-  if(cfg.world&&save.world&&(a.serious||b.serious)){const w=save.world,O=w.out||(w.out={}),n=2+(rand()<.5?1:0),id=a.serious?'you':cfg.rival;O[id]=n;(w.injNews||(w.injNews=[])).push([id,n,a.serious?cfg.rival:'you']);wInjNews(w);}
-  if(a.serious)injMsg=`Te lesionaste: abandonaste el partido${cfg.world?' y te vas a perder los próximos partidos (tus rivales ganan 5-0)':''}.`;else if(b.serious)injMsg=`${b.name} se lesionó y abandonó: el partido es tuyo.`;
+  if(cfg.world&&save.world&&b.serious&&!a.serious){const w=save.world,O=w.out||(w.out={}),n=2+(rand()<.5?1:0),id=cfg.rival;O[id]=n;(w.injNews||(w.injNews=[])).push([id,n,'you']);wInjNews(w);}
+  if(cfg.world&&save.world&&a.serious){const ks=Object.keys(INJ_LBL);save.injPending={kind:'serious',n:2+(rand()<.5?1:0),k:(a.injury&&a.injury.k)||ks[Math.floor(rand()*ks.length)],opp:cfg.rival};}
+  if(a.serious)injMsg=`Te lesionaste: abandonaste el partido.${cfg.world?' Elegí abajo si descansás o jugás tocado.':''}`;else if(b.serious)injMsg=`${b.name} se lesionó y abandonó: el partido es tuyo.`;
   if(a.serious){}
+  else if(a.injury&&cfg.world&&save.world){save.injPending={kind:'minor',k:a.injury.k,amt:+a.injury.amt.toFixed(3),opp:cfg.rival};injMsg=`Terminaste con una molestia (${INJ_LBL[a.injury.k]}). Elegí abajo qué hacés.`;}
   else if(a.injury){save.injury={k:a.injury.k,amt:+a.injury.amt.toFixed(3),games:2};injMsg=`Terminaste con una molestia: ${INJ_LBL[a.injury.k]} -${Math.round(a.injury.amt*99)} por 2 partidos.`;}
+  else if(IJ&&IJ.games>0&&IJ.tocado&&cfg.world&&save.world&&rand()<.12){save.injury=null;const w=save.world,O=w.out||(w.out={});O.you=3;(w.injNews||(w.injNews=[])).push(['you',3,cfg.rival]);wInjNews(w);injMsg='¡Recaída! Forzaste de más y te perdés los próximos 3 partidos.';}
   else if(IJ&&IJ.games>0){IJ.games--;if(IJ.games<=0){save.injury=null;injMsg='Te recuperaste de la molestia.';}else injMsg=`Seguís con molestias (${INJ_LBL[IJ.k]}): ${IJ.games} partido más.`;}
   if(b.injury&&cfg.world&&save.world){const w=save.world;(w.inj||(w.inj={}))[cfg.rival]={k:b.injury.k,amt:b.injury.amt,g:2};addNews(w,`${nT(cfg.rival)} quedó tocado`,`Se golpeó en el partido con ${nT('you')} y va a jugar con molestias.`,'lesion');}
   const grown=[];if(game.mode==='match'&&cfg.rival&&!cfg.tri&&!cfg.asg)scoutSave(cfg.rival,a);if(cfg.world&&cfg.train)save.trainBuff=null;
@@ -3469,7 +3535,7 @@ function showResult(won){setMatchUI(false);const cfg=game.cfg,[a,b]=game.players
   persist();
   $('#rTitle').textContent=won?'¡Ganaste!':'Perdiste';$('#rTitle').className='res'+(won?' win':'');
   $('#rScore').textContent=`${a.name} ${a.score} – ${b.score} ${b.name}`;
-  $('#rReward').innerHTML=(reward?`<span class="reward">${reward}</span>`:'')+(nemMsg?`<p class="nem">${nemMsg}</p>`:'')+(grown.length?`<p class="grow">Mejoraste jugando: ${grown.join(' · ')}</p>`:'')+(injMsg?`<p class="nem">${injMsg}</p>`:'')+(extra.length?`<p class="grow">${extra.join(' · ')}</p>`:'')+(mil.length?`<p class="grow">${mil.join(' · ')}</p>`:'');
+  $('#rReward').innerHTML=(reward?`<span class="reward">${reward}</span>`:'')+(nemMsg?`<p class="nem">${nemMsg}</p>`:'')+(grown.length?`<p class="grow">Mejoraste jugando: ${grown.join(' · ')}</p>`:'')+(injMsg?`<p class="nem">${injMsg}</p>`:'')+injChoiceHTML()+(extra.length?`<p class="grow">${extra.join(' · ')}</p>`:'')+(mil.length?`<p class="grow">${mil.join(' · ')}</p>`:'');
   const pct=(m,n)=>n?Math.round(m/n*100)+'%':'—';
   const row=p=>{const s=p.stats;return `<tr><td>${p.name}</td><td>${s.pts}</td><td>${s.im}/${s.ia}</td><td>${s.om}/${s.oa}</td><td>${s.ftm}/${s.fta}</td><td>${pct(s.im+s.om,s.ia+s.oa)}</td><td>${s.reb}</td><td>${s.stl}</td><td>${s.blk}</td><td>${s.dnk}</td><td>${s.fl}</td></tr>`;};
   $('#rTable').innerHTML=`<thead><tr><th>Jugador</th><th>Pts</th><th>De 1</th><th>De 2</th><th>TL</th><th>%</th><th>Reb</th><th>Rob</th><th>Tap</th><th>Volc</th><th>Falt</th></tr></thead><tbody>${row(a)}${row(b)}</tbody>`;
@@ -3483,10 +3549,20 @@ function showResult(won){setMatchUI(false);const cfg=game.cfg,[a,b]=game.players
   else{add(won?'Jugar otra vez':'Revancha','primary',()=>startMatch(cfg));add('Cambiar rival','',()=>{startDemo();show('quick');});}
   add('Menú','ghost',()=>{startDemo();show('menu');});
   if(cfg.world&&save.world&&!cfg.asg&&!cfg.sim&&!a.serious&&!b.serious&&(cfg.clasico||'PSNMC'.includes(cfg.wtype||'L')||rand()<.35))$('#rReward').insertAdjacentHTML('beforeend',interviewHTML(won,cfg.rival));
-  wireInterview(won,cfg.rival);
+  wireInterview(won,cfg.rival);wireInj();
   show('result');if(celebQ.length)setTimeout(showCelebration,300);}
 const IV_WIN=[['humilde','Respeto total, es un rival durísimo.'],['picante','No me puede marcar. Que se vaya acostumbrando.'],['neutral','Ya está, a pensar en el próximo.']];
 const IV_LOSE=[['humilde','Me ganó bien. A seguir laburando.'],['picante','Tuvo suerte. La revancha es mía.'],['neutral','El árbitro también juega, ¿no?']];
+function injChoiceHTML(){const P=save.injPending;if(!P)return '';const L=INJ_LBL[P.k]||'Físico';
+  return P.kind==='serious'?`<div class="iview" id="injBox"><b>🚑 Lesión (${L.toLowerCase()})</b><p>¿Qué hacés?</p><button class="chip" data-inj="rest">Descansar: me pierdo ${P.n} partidos (mis rivales ganan 5-0) y vuelvo al 100%</button><button class="chip" data-inj="play">Jugar tocado: 4 partidos con ${L.toLowerCase()} -12 y riesgo de recaída</button></div>`
+    :`<div class="iview" id="injBox"><b>🩹 Molestia (${L.toLowerCase()})</b><p>¿Qué hacés?</p><button class="chip" data-inj="play">Jugar con la molestia: ${L.toLowerCase()} -${Math.round(P.amt*99)} por 2 partidos</button><button class="chip" data-inj="rest">Descansar 1 partido (lo perdés 5-0) y volver sano</button></div>`;}
+function injResolve(ch){const P=save.injPending,w=save.world;if(!P)return '';save.injPending=null;let m='';
+  if(ch==='rest'){const n=P.kind==='serious'?P.n:1;if(w){const O=w.out||(w.out={});O.you=n;(w.injNews||(w.injNews=[])).push(['you',n,P.opp]);wInjNews(w);}save.injury=null;m=`Descansás ${n} partido${n>1?'s':''}: mientras no estés, tus rivales ganan 5-0.`;}
+  else if(P.kind==='serious'){save.injury={k:P.k,amt:.12,games:4,tocado:true};m='Jugás tocado los próximos 4 partidos. Cuidado: puede haber recaída.';}
+  else{save.injury={k:P.k,amt:P.amt,games:2};m='Jugás con la molestia los próximos 2 partidos.';}
+  persist();return m;}
+function injDefault(){if(save.injPending)injResolve(save.injPending.kind==='serious'?'rest':'play');}
+function wireInj(after){const b=document.getElementById('injBox');if(!b)return;b.querySelectorAll('[data-inj]').forEach(x=>x.addEventListener('click',()=>{const m=injResolve(x.dataset.inj);b.innerHTML=`<b>Decidido</b><p>${m}</p>`;if(after)setTimeout(after,900);}));}
 function interviewHTML(won,rid){const r=RIVALS[rid],n=(r?r.name:'tu rival').replace(/\.$/,''),Q=won?`Le ganaste a ${n}. ¿Qué le decís?`:`Perdiste con ${n}. ¿Qué decís?`;
   return `<div class="iview" id="iview"><b>🎙 Entrevista</b><p>${Q}</p>${(won?IV_WIN:IV_LOSE).map((x,i)=>`<button class="chip" data-iv="${i}">${x[1]}</button>`).join('')}</div>`;}
 function wireInterview(won,rid){const box=document.getElementById('iview');if(!box)return;box.querySelectorAll('[data-iv]').forEach(bt=>bt.addEventListener('click',()=>{
