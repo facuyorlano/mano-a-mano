@@ -315,6 +315,7 @@ td.mecell{color:var(--paint)}
 .troph small{display:block;color:var(--muted);font-weight:700;font-size:12px;margin-top:3px}
 .troph .n{position:absolute;top:6px;right:8px;font:400 20px var(--f-display);color:var(--paint)}
 .troph.off{opacity:.38}
+.vitrina.mini{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}.vitrina.mini .troph{padding:8px 6px}.vitrina.mini .troph svg{width:50px;height:50px}.vitrina.mini .troph b{font-size:13px}
 .troph.off svg{filter:grayscale(1) brightness(.6)}
 .hofc{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;border:3px solid var(--paint);background:rgba(255,210,63,.08);padding:10px;margin:8px 0}
 .hofc canvas{width:72px;height:72px}
@@ -2647,7 +2648,7 @@ function worldAdvance(w,my){injDefault();let reward=[];const ev=cal(w)[w.step];
     G.forEach(o=>{const S=o.S,me=S.a==='you'||S.b==='you';let sa,sb;if(my&&me){sa=S.a==='you'?my.s:my.o;sb=S.a==='you'?my.o:my.s;}else[sa,sb]=wPlay(w,S.a,S.b);
       S.games.push([sa,sb]);if(sa>sb)S.wa++;else S.wb++;res.push({a:S.a,b:S.b,sa,sb,me});
       if(S.wa>=2||S.wb>=2){const wn=S.wa>=2?S.a:S.b,ls=wn===S.a?S.b:S.a;if(me)reward.push(wn==='you'?`¡Ganaste la serie (${Math.max(S.wa,S.wb)}-${Math.min(S.wa,S.wb)})!`:'Quedaste afuera de los playoffs');
-        if(S===w.nbapo.f){w.nbapo.champ=wn;addNews(w,`¡${nT(wn)} es el campeón de la NBA!`,`Ganó la final ${Math.max(S.wa,S.wb)}-${Math.min(S.wa,S.wb)} ante ${nT(ls)}.`,me?'you':'campeon');if(wn==='you'){reward.push('¡CAMPEÓN DE LA NBA!');celebrate('Campeón de la NBA',`Temporada ${w.season} · ganaste la final ${Math.max(S.wa,S.wb)}-${Math.min(S.wa,S.wb)}`,'bigcup','#c9a2ff');}}}});
+        if(S===w.nbapo.f){w.nbapo.champ=wn;addNews(w,`¡${nT(wn)} es el campeón de la NBA!`,`Ganó la final ${Math.max(S.wa,S.wb)}-${Math.min(S.wa,S.wb)} ante ${nT(ls)}.`,me?'you':'campeon');if(wn==='you'){reward.push('¡CAMPEÓN DE LA NBA!');celebrate('Campeón de la NBA',`Temporada ${w.season} · ganaste la final ${Math.max(S.wa,S.wb)}-${Math.min(S.wa,S.wb)}`,'lig0','#e8b93c');}}}});
     nbaGames(w);w.last={title:'Playoffs NBA',res};}
   else if(ev==='M'){const G=mundoGames(w),res=[],M=w.mundo,g0=G[0];
     G.forEach(o=>{const [a,b]=o.p,me=a==='you'||b==='you';let sa,sb;if(my&&me){sa=a==='you'?my.s:my.o;sb=a==='you'?my.o:my.s;}else[sa,sb]=wPlay(w,a,b);
@@ -2656,7 +2657,7 @@ function worldAdvance(w,my){injDefault();let reward=[];const ev=cal(w)[w.step];
       if(me){const won=(sa>sb)===(a==='you');if(o.kind==='g')reward.push(won?'¡Ganaste en la Copa del Mundo!':'Perdiste en la fase de grupos');else if(o.kind==='k')reward.push(won?`¡Ganaste ${o.R.name.toLowerCase()} de la Copa del Mundo!`:'Quedaste afuera de la Copa del Mundo');else if(sDone(o.S))reward.push(sWin(o.S)==='you'?'¡CAMPEÓN DE LA COPA DEL MUNDO!':'Perdiste la final de la Copa del Mundo');}});
     if(g0&&g0.kind==='g'&&g0.f===2){const gi=M.groups.findIndex(x=>x.ids.includes('you'));if(gi>=0){const pos=mgStand(w,M.groups[gi]).findIndex(x=>x.id==='you');reward.push(pos<2?`¡Pasaste a octavos: ${pos+1}º del grupo ${GRP[gi]}!`:`Terminaste ${pos+1}º en el grupo ${GRP[gi]}: afuera de la Copa del Mundo`);}}
     mundoGames(w);
-    if(M.champ&&!M.told){M.told=true;const F=M.fin,ls=F.a===M.champ?F.b:F.a;const A=at(w,M.champ);A.mundo=(A.mundo||0)+1;if(M.champ==='you')celebrate('Copa del Mundo',`Temporada ${w.season} · el mejor del planeta`,'bigcup','#3ddc84');
+    if(M.champ&&!M.told){M.told=true;const F=M.fin,ls=F.a===M.champ?F.b:F.a;const A=at(w,M.champ);A.mundo=(A.mundo||0)+1;if(M.champ==='you')celebrate('Copa del Mundo',`Temporada ${w.season} · el mejor del planeta`,'mundo','#3ddc84');
       addNews(w,`¡${nT(M.champ)} ganó la Copa del Mundo!`,`Ganó la final ${Math.max(F.wa,F.wb)}-${Math.min(F.wa,F.wb)} ante ${nT(ls)}. Es el mejor jugador del planeta esta temporada.`,M.champ==='you'?'you':'campeon');}
     const myG=M.groups.findIndex(x=>x.ids.includes('you'));
     w.last={title:'Copa del Mundo · '+(g0?(g0.kind==='g'?'Fase de grupos · fecha '+(g0.f+1):g0.kind==='k'?g0.R.name:'Final'):''),res:res.filter(r=>r.me||(g0&&g0.kind==='g'?r.gi===myG||myG<0&&r.gi<2:true))};}
@@ -2670,7 +2671,7 @@ function worldAdvance(w,my){injDefault();let reward=[];const ev=cal(w)[w.step];
     w.last={title:ev==='P'?'Play-in':'Promoción',res:res.filter(r=>r.me||res.length<=8)};}
   else if(!w.cup.champ&&w.cup.rounds[w.cup.r]){const youIn=w.cup.rounds[w.cup.r].pairs.some(m=>m.includes('you'));const {R,win}=cupPlayRound(w,my);
     newsCup(w,R,w.cup.r-1);
-    if(w.cup.champ==='you')celebrate('Copa Argentina',`Temporada ${w.season}`,'bigcup','#e8edf3');
+    if(w.cup.champ==='you')celebrate('Copa Argentina',`Temporada ${w.season}`,'copaarg','#75aadb');
     if(youIn){if(win.includes('you')){w.myCupStage=w.cup.champ==='you'?'Campeón':w.cup.rounds[w.cup.r].name;reward.push(w.cup.champ==='you'?'¡Campeón de la Copa Argentina!':'¡Pasaste de ronda en la Copa!');}else w.myCupStage=R.name;}
     w.last={title:'Copa Argentina · '+R.name,res:R.pairs.map(([a,b],i)=>({a,b,sa:R.res[i][0],sb:R.res[i][1]})).filter(x=>x.a==='you'||x.b==='you'||R.pairs.length<=4)};}
   wInjTick(w,ev);wInjNews(w);
@@ -2786,7 +2787,7 @@ function endWorldSeason(w){const msgs=[];{const myD0=divOf(w,'you');if(myD0>=0){
   if(PR)PR.list.forEach(x=>{if(!x.win||!x.ser)return;const A=x.ser.a,B=x.ser.b,low=x.win===A;promoRes.push({d:x.d,a:A,b:B,win:x.win,wa:x.ser.wa,wb:x.ser.wb});
     if(low&&nd[x.d].includes(A)&&nd[x.d-1].includes(B)){nd[x.d].splice(nd[x.d].indexOf(A),1,B);nd[x.d-1].splice(nd[x.d-1].indexOf(B),1,A);}});
   // rewards & summary for the player
-  if(CH[myD]==='you'&&myD>0)celebrate('Campeón de '+DIVS[myD],`Temporada ${w.season}`,'cup',DIVCOL[myD]);
+  if(CH[myD]==='you'&&myD>0)celebrate('Campeón de '+DIVS[myD],`Temporada ${w.season}`,'lig'+myD,DIVCOL[myD]);
   if(CH[myD]==='you')msgs.push(myD===0?'¡CAMPEÓN DE LA NBA!':`¡Campeón de ${DIVS[myD]}!`);else if(myD===0&&myPos===1)msgs.push('Terminaste 1º en la fase regular de la NBA');
   if(MU==='you')msgs.push('¡CAMPEÓN DE LA COPA DEL MUNDO!');
   if(up[myD].includes('you'))msgs.push(myD===1?'¡SUBISTE A LA NBA!':`¡Ascendiste a ${DIVS[myD-1]}!`);
@@ -3138,10 +3139,10 @@ function renderTri(){const R=save.tri||{best:0,plays:0,hist:[],wins:0};
 
 /* ================= ficha de jugador ================= */
 function hofOf(id){return (save.hof||[]).find(e=>e.rid===id);}
-function worldTitles(w,id){const t={lig:DIVS.map(()=>[]),cup:[],asg:[],tri:[],mundo:[]};
+function worldTitles(w,id){const t={lig:DIVS.map(()=>[]),cup:[],asg:[],tri:[],mundo:[],series:[]};
   if(id==='you'&&save.archW){const A=save.archW;(A.lig||[]).forEach((s,d)=>{if(t.lig[d])t.lig[d].push(...s);});['cup','asg','tri','mundo'].forEach(k=>t[k].push(...(A[k]||[])));}
   if(!w)return t;
-  w.history.forEach(x=>{if(x.mundo===id)t.mundo.push(x.s);x.champ.forEach((c,d)=>{if(c===id)t.lig[d].push(x.s);});if(x.cup===id)t.cup.push(x.s);if(x.asg===id)t.asg.push(x.s);if(x.tri===id)t.tri.push(x.s);});return t;}
+  w.history.forEach(x=>{if(x.mundo===id)t.mundo.push(x.s);x.champ.forEach((c,d)=>{if(c===id)t.lig[d].push(x.s);});if(x.cup===id)t.cup.push(x.s);if(x.asg===id)t.asg.push(x.s);if(x.tri===id)t.tri.push(x.s);if(x.series===id)t.series.push(x.s);});return t;}
 function careerHTML(w,id){const A=w.allTime[id],L=(A&&A.log)||[],d0=divOf(w,id);
   const cur=d0>=0&&w.phase==='season'&&w.ps[id]&&w.ps[id].gp?(()=>{const T=w.table[d0][id],P=w.ps[id];return {s:w.season,d:d0,pos:wStand(w,d0).findIndex(x=>x.id===id)+1,g:T.g,p:T.p,gp:P.gp,pts:P.pts,om:P.om||0,stl:P.stl,blk:P.blk,reb:P.reb,hi:P.hi||0,m:Math.round(ovr(wStats(w,id))*99),t:['en curso'],live:true};})():null;
   const rows=[...L,...(cur?[cur]:[])];if(!rows.length)return '';
@@ -3150,6 +3151,13 @@ function careerHTML(w,id){const A=w.allTime[id],L=(A&&A.log)||[],d0=divOf(w,id);
   let h=`<h3>Estadísticas de carrera</h3><p class="sub" style="font-size:13px;margin:0 0 6px">Fase regular de liga. Entre paréntesis, el promedio por partido.</p><div class="tiles"><div><span>Temporadas</span><b>${rows.length}</b></div><div><span>Partidos</span><b>${tot.gp}</b></div><div><span>Récord</span><b>${tot.g}-${tot.p} (${tot.g+tot.p?Math.round(tot.g/(tot.g+tot.p)*100):0}%)</b></div><div><span>Puntos</span><b>${tot.pts} (${f(tot.pts,tot.gp)})</b></div><div><span>Dobles de afuera</span><b>${tot.om} (${f(tot.om,tot.gp)})</b></div><div><span>Robos</span><b>${tot.stl} (${f(tot.stl,tot.gp)})</b></div><div><span>Tapones</span><b>${tot.blk} (${f(tot.blk,tot.gp)})</b></div><div><span>Rebotes</span><b>${tot.reb} (${f(tot.reb,tot.gp)})</b></div><div><span>Récord en un partido</span><b>${tot.hi} pts</b></div><div><span>Mejor temporada</span><b>${bestS?bestS.pos+'º en '+DIVSH[bestS.d]+' (T'+bestS.s+')':'—'}</b></div></div>`;
   h+=`<h3>Temporada por temporada</h3><div class="tblwrap"><table><thead><tr><th>Temp.</th><th class="l">Liga</th><th>Pos</th><th>G-P</th><th>PJ</th><th>Pts</th><th>PPP</th><th>Afuera</th><th>Rob</th><th>Tap</th><th>Reb</th><th>Máx</th><th>Media</th><th class="l">Logros</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td${r.live?' class="mecell"':''}>${r.s}</td><td class="l">${DIVSH[r.d]}</td><td>${r.pos}º</td><td>${r.g}-${r.p}</td><td>${r.gp}</td><td>${r.pts}</td><td>${f(r.pts,r.gp)}</td><td>${r.om}</td><td>${r.stl}</td><td>${r.blk}</td><td>${r.reb}</td><td>${r.hi}</td><td>${r.m}</td><td class="l">${(r.t||[]).join(', ')||'—'}</td></tr>`).join('')}</tbody></table></div>`;
   return h;}
+function rivalShelf(w,id){const T=worldTitles(w,id),A=w.allTime[id]||{},L=[],ts=s=>s.length?'T'+s.join(', T'):'',add=(kind,col,name,n,detail)=>{if(n)L.push({kind,col,name,n,detail});};
+  DIVS.forEach((_,d)=>add('lig'+d,DIVCOL[d],d===0?'Campeón de la NBA':'Campeón de '+DIVSH[d],T.lig[d].length,ts(T.lig[d])));
+  add('mundo','#3ddc84','Copa del Mundo',T.mundo.length,ts(T.mundo));add('copaarg','#75aadb','Copa Argentina',T.cup.length,ts(T.cup));add('series','#c13584','Copa Series',T.series.length,ts(T.series));
+  add('star','#ffd23f','Juego de las Estrellas',T.asg.length,ts(T.asg));add('ball','#f26a1e','Concurso de triples',T.tri.length,ts(T.tri));
+  [['m_mvp','Jugador del año',A.mvp],['m_top','Máximo anotador',A.top],['m_def','Mejor defensor',A.def],['m_sh','Mejor tirador',A.sh],['m_mip','Más mejorado',A.mip],['m_five','Quinteto ideal',A.five]].forEach(([k,n,v])=>add(k,'#ffd23f',n,v||0,''));
+  return L;}
+function shelfHTML(L,me){return `<h3>Vitrina</h3>`+(L.length?`<p class="sub" style="font-size:13px;margin:0 0 4px">${L.reduce((a,t)=>a+t.n,0)} trofeos y premios · ${L.length} distintos</p><div class="vitrina mini">${L.map(t=>`<div class="troph">${t.n>1?`<span class="n">×${t.n}</span>`:''}${tSVG(t.kind,t.col)}<b>${t.name}</b><small>${t.detail||(t.n===1?'Ganado una vez':'Ganado '+t.n+' veces')}</small></div>`).join('')}</div>`:`<p class="sub">${me?'Todavía no ganaste nada. ¡A buscarlo!':'Todavía no ganó nada.'}</p>`);}
 function openCard(id){if(id!=='you'&&!RIVALS[id])return;const w=save.world,r=RIVALS[id],me=id==='you',E=hofOf(id);
   const look=me?humanLook():r.look,inW=w&&divOf(w,id)>=0,st=inW?wStats(w,id):me?humanStats():r.st,o=ovr(st);
   let h=`<div class="pchead"><span id="pcPort"></span><div style="min-width:0"><div class="nm">${teamName(id)}</div><div class="sub">${me?ARCH[save.arch].name+' · '+(save.age||22)+' años':(r.nick+' · '+TIERS[r.tier].name)} · ${look.hm.toFixed(2).replace('.',',')} m</div>
@@ -3167,7 +3175,7 @@ function openCard(id){if(id!=='you'&&!RIVALS[id])return;const w=save.world,r=RIV
     if(A){h+=`<h3>Historia en la liga</h3><div class="tiles"><div><span>Temporadas</span><b>${A.seasons}</b></div><div><span>Puntos</span><b>${A.pts}</b></div><div><span>Victorias</span><b>${A.w}</b></div><div><span>Ligas</span><b>${A.lt}</b></div><div><span>Copas Argentina</span><b>${A.cups}</b></div><div><span>Jugador del año</span><b>${A.mvp}</b></div><div><span>Goleador</span><b>${A.top}</b></div><div><span>Mejor defensor</span><b>${A.def}</b></div><div><span>Estrellas / Triples</span><b>${A.asg||0} / ${A.tri||0}</b></div><div><span>Mejor tirador</span><b>${A.sh||0}</b></div><div><span>Más mejorado</span><b>${A.mip||0}</b></div><div><span>Quinteto ideal</span><b>${A.five||0}</b></div><div><span>Copas del Mundo</span><b>${A.mundo||0}</b></div>${A.series?`<div><span>Copas Series</span><b>${A.series}</b></div>`:''}</div>`;}
     h+=careerHTML(w,id);
     const ttl=[...T.lig.map((s,d)=>s.length?`Campeón de ${DIVSH[d]} (T${s.join(', T')})`:'' ),T.cup.length?`Copa Argentina (T${T.cup.join(', T')})`:'',T.asg.length?`Juego de las Estrellas (T${T.asg.join(', T')})`:'',T.tri.length?`Concurso de triples (T${T.tri.join(', T')})`:''].filter(Boolean);
-    if(ttl.length)h+=`<p><b style="color:var(--paint)">Títulos:</b> ${ttl.join(' · ')}</p>`;
+    h+=shelfHTML(me?trophies().filter(t=>t.n):rivalShelf(w,id),me);
   }
   if(!me){h+=`<h3>Mano a mano con vos</h3><p class="h2h" style="font-size:15px">${h2hLine(id,w)}</p>`;}
   else h+=(w?`<h3>Tu evolución</h3>`+evoSVG(w):'')+`<div class="row" style="margin-top:10px"><button class="btn" id="pcVit">Ver mi vitrina</button></div>`;
@@ -3178,7 +3186,30 @@ $('#pcClose').addEventListener('click',()=>{$('#pcard').hidden=true;});
 $('#pcard').addEventListener('click',e=>{if(e.target.id==='pcard')$('#pcard').hidden=true;});
 
 /* ================= vitrina de trofeos ================= */
-function tSVG(kind,col){const dk=shade(col,-.3);
+const LIG_ART=['nba','euro',['tallcup','#e8c547','#75aadb'],['cup','#d6dee8','#75aadb'],['shield','#2b9348','#ffd23f'],['cup','#2bb3a3','#f6f1e4'],['plaque','#8e6bd8'],['tallcup','#ff9f43','#f6f1e4'],'wood'];
+const T_BASE=(c='#5b3a1e',pl)=>`<path d="M16 52h32l-2 9H18z" fill="${c}"/><rect x="18" y="52" width="28" height="2" fill="#fff" opacity=".18"/>${pl?`<rect x="26" y="55" width="12" height="3" fill="${pl}"/>`:''}`;
+const T_HANDLES=(c,y=10)=>`<path d="M18 ${y+2}H10c0 9 4 13 9 14M46 ${y+2}h8c0 9-4 13-9 14" stroke="${c}" stroke-width="4" fill="none"/>`;
+const T_BALL=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#f26a1e"/><path d="M${x-r} ${y}h${2*r}M${x} ${y-r}v${2*r}" stroke="#3a1a0a" stroke-width="1"/><path d="M${x-r*.6} ${y-r*.8}c${r*.5} ${r*.5} ${r*.5} ${r*1.1} 0 ${r*1.6}M${x+r*.6} ${y-r*.8}c${-r*.5} ${r*.5} ${-r*.5} ${r*1.1} 0 ${r*1.6}" stroke="#3a1a0a" stroke-width="1" fill="none"/>`;
+const MEDAL_ICON={crown:'<path d="M24 46l2-9 4 4 2-7 2 7 4-4 2 9z" fill="DK"/>',flame:'<path d="M32 30c5 4 7 8 5 12-1 3-5 4-5 4s-5-1-6-4c-1-4 2-6 2-9 1 2 2 3 4 4-1-2-1-5 0-7z" fill="DK"/>',
+  shield:'<path d="M25 31h14v7c0 6-4 9-7 10-3-1-7-4-7-10z" fill="DK"/>',target:'<circle cx="32" cy="40" r="9" fill="none" stroke="DK" stroke-width="2.5"/><circle cx="32" cy="40" r="4.5" fill="none" stroke="DK" stroke-width="2.5"/><circle cx="32" cy="40" r="1.6" fill="DK"/>',
+  arrow:'<path d="M32 30l8 9h-5v9h-6v-9h-5z" fill="DK"/>',five:'<g fill="DK"><circle cx="25" cy="36" r="2.6"/><circle cx="39" cy="36" r="2.6"/><circle cx="32" cy="40" r="2.6"/><circle cx="25" cy="44" r="2.6"/><circle cx="39" cy="44" r="2.6"/></g>'};
+const T_MEDALS={m_mvp:['#ffd23f','crown','#75aadb'],m_top:['#ff9f43','flame','#e63946'],m_def:['#cd8a4f','shield','#0b1830'],m_sh:['#d6dee8','target','#f26a1e'],m_mip:['#3ddc84','arrow','#2b9348'],m_five:['#75aadb','five','#f6f1e4']};
+function tArt(kind,col){
+  if(/^lig\d$/.test(kind)){const A=LIG_ART[+kind.slice(3)];kind=Array.isArray(A)?A[0]:A;if(Array.isArray(A))return tArt(kind+':'+A[1]+':'+A[2]);}
+  const [k,c1,c2]=kind.split(':');
+  if(T_MEDALS[k]){const [c,ic,rb]=T_MEDALS[k],dk=shade(c,-.35);return `<svg viewBox="0 0 64 64"><path d="M20 3h10l6 22H26zM44 3H34l-6 22h10z" fill="${rb}"/><path d="M24 3h3l6 22h-3z" fill="#fff" opacity=".35"/><circle cx="32" cy="40" r="18" fill="${c}"/><circle cx="32" cy="40" r="14" fill="none" stroke="${dk}" stroke-width="2"/>${MEDAL_ICON[ic].split('DK').join(dk)}<path d="M20 32a14 14 0 0 1 10-7" stroke="#fff" stroke-width="2" opacity=".45" fill="none"/></svg>`;}
+  if(k==='nba')return `<svg viewBox="0 0 64 64">${T_BALL(32,10,7)}<path d="M21 19h22l-5 23H26z" fill="#e8b93c"/><path d="M21 19h22" stroke="#ffe08a" stroke-width="2.5"/><path d="M24 22l12 18M30 22l8 12M40 22L28 40M34 22l-8 12" stroke="#b8892a" stroke-width="1.2"/><path d="M23 21l4 19" stroke="#fff3c0" stroke-width="1.5" opacity=".6"/><rect x="28" y="42" width="8" height="7" fill="#b8892a"/><rect x="24" y="48" width="16" height="4" fill="#e8b93c"/>${T_BASE('#2a2a2a','#e8b93c')}</svg>`;
+  if(k==='euro')return `<svg viewBox="0 0 64 64"><path d="M8 13h48c0 15-11 25-24 25S8 28 8 13z" fill="#cfd6df"/><path d="M9 17h46l-1 5H10z" fill="#ff7a1a"/><path d="M8 15c-7 0-7 13 5 17M56 15c7 0 7 13-5 17" stroke="#aeb7c3" stroke-width="3.5" fill="none"/><path d="M14 15c1 9 6 15 12 18" stroke="#fff" stroke-width="2.5" opacity=".55" fill="none"/><rect x="29" y="38" width="6" height="9" fill="#9aa3ae"/><rect x="23" y="46" width="18" height="5" fill="#cfd6df"/>${T_BASE('#0b1830','#ff7a1a')}</svg>`;
+  if(k==='cup'&&c1){const dk=shade(c1,-.3);return `<svg viewBox="0 0 64 64"><path d="M18 8h28v12c0 9-6 16-14 16S18 29 18 20z" fill="${c1}"/><rect x="18" y="13" width="28" height="5" fill="${c2}"/>${T_HANDLES(c1)}<path d="M23 10h4v14c-3-2-4-6-4-9z" fill="#fff" opacity=".35"/><rect x="28" y="36" width="8" height="9" fill="${dk}"/><rect x="21" y="45" width="22" height="5" fill="${c1}"/>${T_BASE()}</svg>`;}
+  if(k==='tallcup'&&c1){const dk=shade(c1,-.3);return `<svg viewBox="0 0 64 64"><path d="M24 4h16v6c0 4 7 6 7 15 0 8-7 13-15 13s-15-5-15-13c0-9 7-11 7-15z" fill="${c1}"/><rect x="17" y="22" width="30" height="5" fill="${c2}"/><path d="M20 14c-5-2-8 2-6 6M44 14c5-2 8 2 6 6" stroke="${c1}" stroke-width="3" fill="none"/><path d="M22 16c-2 4-2 10 2 15" stroke="#fff" stroke-width="2.5" opacity=".4" fill="none"/><rect x="28" y="38" width="8" height="8" fill="${dk}"/><rect x="22" y="46" width="20" height="5" fill="${c1}"/>${T_BASE()}</svg>`;}
+  if(k==='shield'&&c1){const dk=shade(c1,-.35);return `<svg viewBox="0 0 64 64"><path d="M14 6h36v17c0 14-9 21-18 25C23 44 14 37 14 23z" fill="${c1}"/><path d="M18 10h28v13c0 11-7 17-14 20-7-3-14-9-14-20z" fill="none" stroke="${c2}" stroke-width="2"/>${T_BALL(32,24,8)}<path d="M18 10h10c-4 6-5 15-2 24" stroke="#fff" stroke-width="2" opacity=".3" fill="none"/><rect x="29" y="47" width="6" height="5" fill="${dk}"/>${T_BASE()}</svg>`;}
+  if(k==='plaque'&&c1)return `<svg viewBox="0 0 64 64"><rect x="11" y="6" width="42" height="48" rx="5" fill="#7a4a25"/><rect x="13" y="8" width="38" height="44" rx="4" fill="none" stroke="#a0683a" stroke-width="1.5"/><rect x="17" y="12" width="30" height="22" rx="2" fill="${c1}"/>${T_BALL(32,23,7)}<rect x="19" y="39" width="26" height="8" rx="1" fill="#e8d9a8"/><path d="M23 43h18" stroke="#8a6a3c" stroke-width="1.5"/><circle cx="15" cy="10" r="1" fill="#e8d9a8"/><circle cx="49" cy="10" r="1" fill="#e8d9a8"/><path d="M14 58h36" stroke="#3a2412" stroke-width="3"/></svg>`;
+  if(k==='wood')return `<svg viewBox="0 0 64 64">${T_BASE('#6b4423')}<rect x="30" y="16" width="4" height="36" fill="#8b5a2b"/><rect x="19" y="6" width="26" height="13" fill="#c9a46a" stroke="#6b4423" stroke-width="1.5"/><rect x="28" y="10" width="8" height="6" fill="none" stroke="#6b4423" stroke-width="1.2"/><ellipse cx="32" cy="21" rx="8" ry="2.2" fill="none" stroke="#c4471c" stroke-width="2"/><path d="M25 22l2 8M29 23l1 8M35 23l-1 8M39 22l-2 8M27 30h10" stroke="#9aa3ab" stroke-width="1.3"/>${T_BALL(46,46,5)}</svg>`;
+  if(k==='copaarg')return `<svg viewBox="0 0 64 64"><path d="M16 4h32v14c0 11-7 19-16 19S16 29 16 18z" fill="#75aadb"/><rect x="16" y="11" width="32" height="7" fill="#f6f1e4"/><circle cx="32" cy="14.5" r="3" fill="#ffd23f"/><path d="M32 9.5v-1.8M32 21.3v-1.8M27 14.5h-1.8M38.8 14.5H37M28.5 11l-1.2-1.2M36.7 19.2l-1.2-1.2M35.5 11l1.2-1.2M27.3 19.2l1.2-1.2" stroke="#ffd23f" stroke-width="1.1"/>${T_HANDLES('#75aadb',6)}<path d="M21 6h4v14c-3-2-4-6-4-9z" fill="#fff" opacity=".35"/><rect x="28" y="37" width="8" height="8" fill="#4a7fb0"/><rect x="20" y="45" width="24" height="4" fill="#75aadb"/>${T_BASE('#5b3a1e','#ffd23f')}</svg>`;
+  if(k==='mundo')return `<svg viewBox="0 0 64 64"><path d="M22 50c-2-10 4-15 2-24M42 50c2-10-4-15-2-24" stroke="#e8b93c" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M27 50c0-8 3-12 5-20 2 8 5 12 5 20z" fill="#d4a32e"/><circle cx="32" cy="18" r="13" fill="#2f8fc7"/><path d="M24 12c3-2 7 0 7 3s-4 3-5 6-4 1-4-2 0-5 2-7zM36 18c3-1 6 1 6 4s-3 5-5 4-3-6-1-8zM34 7c2 0 4 1 3 3s-4 1-4-1z" fill="#3ddc84"/><ellipse cx="32" cy="18" rx="6" ry="13" fill="none" stroke="#fff" stroke-width=".8" opacity=".5"/><path d="M19 18h26" stroke="#fff" stroke-width=".8" opacity=".5"/><circle cx="27" cy="12" r="3" fill="#fff" opacity=".35"/>${T_BASE('#0e5a3a','#e8b93c')}</svg>`;
+  if(k==='series')return `<svg viewBox="0 0 64 64"><path d="M24 4l8 9 8-9" stroke="#2a2a2a" stroke-width="2" fill="none"/><rect x="10" y="13" width="44" height="30" rx="7" fill="#c13584"/><rect x="15" y="18" width="28" height="20" rx="4" fill="#1b1f3a"/><path d="M26 23l9 5-9 5z" fill="#f6f1e4"/><circle cx="48" cy="22" r="2.4" fill="#ffd23f"/><circle cx="48" cy="30" r="2.4" fill="#ffd23f"/><path d="M17 20c3-1 6-1 8 0" stroke="#fff" stroke-width="1.5" opacity=".35"/><rect x="29" y="43" width="6" height="9" fill="#e8b93c"/>${T_BASE('#2a1240','#ffd23f')}</svg>`;
+  return null;}
+function tSVG(kind,col){const art=tArt(kind,col);if(art)return art;const dk=shade(col,-.3);
   if(kind==='cup')return `<svg viewBox="0 0 64 64"><path d="M18 8h28v12c0 9-6 16-14 16S18 29 18 20z" fill="${col}"/><path d="M18 12H10c0 9 4 13 9 14M46 12h8c0 9-4 13-9 14" stroke="${col}" stroke-width="4" fill="none"/><path d="M24 10h4v14c-3-2-4-6-4-9z" fill="#fff" opacity=".35"/><rect x="28" y="36" width="8" height="9" fill="${dk}"/><rect x="21" y="45" width="22" height="5" fill="${col}"/><rect x="17" y="50" width="30" height="8" fill="#5b3a1e"/></svg>`;
   if(kind==='bigcup')return `<svg viewBox="0 0 64 64"><path d="M16 4h32v14c0 11-7 19-16 19S16 29 16 18z" fill="${col}"/><path d="M16 8H7c0 11 5 16 11 17M48 8h9c0 11-5 16-11 17" stroke="${col}" stroke-width="4" fill="none"/><rect x="16" y="12" width="32" height="5" fill="#75aadb"/><rect x="16" y="17" width="32" height="2" fill="#fff"/><rect x="28" y="37" width="8" height="8" fill="${dk}"/><rect x="20" y="45" width="24" height="4" fill="${col}"/><rect x="15" y="49" width="34" height="10" fill="#5b3a1e"/><circle cx="32" cy="54" r="2.5" fill="#ffd23f"/></svg>`;
   if(kind==='medal')return `<svg viewBox="0 0 64 64"><path d="M20 4h10l6 22h-10zM44 4H34l-6 22h10z" fill="#75aadb"/><path d="M24 4h3l6 22h-3z" fill="#fff"/><circle cx="32" cy="40" r="17" fill="${col}"/><circle cx="32" cy="40" r="12" fill="none" stroke="${dk}" stroke-width="2.5"/><path d="M32 31l2.6 5.6 6 .6-4.5 4 1.3 6-5.4-3.1-5.4 3.1 1.3-6-4.5-4 6-.6z" fill="${dk}"/></svg>`;
@@ -3188,17 +3219,17 @@ function tSVG(kind,col){const dk=shade(col,-.3);
 function trophies(){const L=[],w=save.world,T=worldTitles(w,'you'),C=save.career,A=save.awards||{},tri=save.tri||{};
   const add=(kind,col,name,n,detail,hint)=>L.push({kind,col,name,n,detail,hint});
   const DC=DIVCOL;
-  DIVS.forEach((_,d)=>add(d===0?'bigcup':'cup',DC[d],d===0?'Campeón de la NBA':'Campeón de '+DIVSH[d],T.lig[d].length,T.lig[d].length?'Temporada '+T.lig[d].join(', '):'','Salí 1º en '+DIVS[d]));
-  add('bigcup','#3ddc84','Copa del Mundo',T.mundo.length,T.mundo.length?'Temporada '+T.mundo.join(', '):'','Ganá la copa de los mejores del planeta');
-  add('bigcup','#e8edf3','Copa Argentina',T.cup.length,T.cup.length?'Temporada '+T.cup.join(', '):'','Ganá la Copa Argentina');
+  DIVS.forEach((_,d)=>add('lig'+d,DC[d],d===0?'Campeón de la NBA':'Campeón de '+DIVSH[d],T.lig[d].length,T.lig[d].length?'Temporada '+T.lig[d].join(', '):'','Salí 1º en '+DIVS[d]));
+  add('mundo','#3ddc84','Copa del Mundo',T.mundo.length,T.mundo.length?'Temporada '+T.mundo.join(', '):'','Ganá la copa de los mejores del planeta');
+  add('copaarg','#75aadb','Copa Argentina',T.cup.length,T.cup.length?'Temporada '+T.cup.join(', '):'','Ganá la Copa Argentina');
   add('star','#ffd23f','Juego de las Estrellas',T.asg.length,T.asg.length?'Temporada '+T.asg.join(', '):'','Sé la estrella de tu división y ganalo');
   add('ball','#f26a1e','Concurso de triples',tri.wins||0,tri.best?'Récord: '+tri.best+' de 30':'','Ganale a las leyendas o a las estrellas');
-  add('medal','#ffd23f','Jugador del año',A.MVP||0,'','El mejor de una temporada');
-  add('medal','#d6dee8','Máximo anotador',A['Máximo anotador']||0,'','El que más puntos mete');
-  add('medal','#e0a070','Mejor defensor',A['Mejor defensor']||0,'','Más robos y tapones por partido');
-  add('medal','#f26a1e','Mejor tirador',A['Mejor tirador']||0,'','El que más dobles de afuera mete en su liga');
-  add('medal','#3ddc84','Más mejorado',A['Más mejorado']||0,'','El que más creció de una temporada a la otra');
-  add('star','#75aadb','Quinteto ideal',A['Quinteto ideal']||0,'','Estar entre los 5 mejores de tu liga');
+  add('m_mvp','#ffd23f','Jugador del año',A.MVP||0,'','El mejor de una temporada');
+  add('m_top','#ff9f43','Máximo anotador',A['Máximo anotador']||0,'','El que más puntos mete');
+  add('m_def','#cd8a4f','Mejor defensor',A['Mejor defensor']||0,'','Más robos y tapones por partido');
+  add('m_sh','#d6dee8','Mejor tirador',A['Mejor tirador']||0,'','El que más dobles de afuera mete en su liga');
+  add('m_mip','#3ddc84','Más mejorado',A['Más mejorado']||0,'','El que más creció de una temporada a la otra');
+  add('m_five','#75aadb','Quinteto ideal',A['Quinteto ideal']||0,'','Estar entre los 5 mejores de tu liga');
   {const nbaS=(w?w.history.filter(x=>x.you&&x.you.d===0).length+(w.divs[0].includes('you')&&w.phase==='season'?1:0):0)+((save.archW&&save.archW.nbaS)||0);add('star','#c9a2ff','Jugar en la NBA',nbaS,nbaS?nbaS+(nbaS>1?' temporadas':' temporada'):'','Ascendé desde la Euroliga');}
   TOURNEYS.forEach(t=>add('cup','#3ddc84',t.name,save.titles.includes(t.id)?1:0,'','Copa desafío (en Más)'));
   return L;}
