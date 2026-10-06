@@ -452,7 +452,7 @@ td.mecell{color:var(--paint)}
     <div class="panel">
       <button class="chip back" data-go="more">Volver</button>
       <h2>Cómo se juega</h2>
-      <p>Un solo aro, mano a mano. Desde adentro de la línea grande el tanto vale <b>1</b>; desde afuera vale <b>2</b>. Se juega a 11 o 2 minutos, lo que llegue primero. Para ganar a 11 hay que sacar 2 de diferencia (o llegar a 15). Si se termina el tiempo, gana el que va arriba; si están empatados hay alargue y gana el primero que saque 2 de diferencia.</p>
+      <p>Un solo aro, mano a mano. Desde adentro de la línea grande el tanto vale <b>1</b>; desde afuera vale <b>2</b>. Se juega a 11 o 2 minutos, lo que llegue primero. Para ganar a 11 hay que sacar 2 de diferencia: si van 11-11, 12-12 o más, se sigue hasta que alguien saque 2 (o hasta que se termine el tiempo). Si se termina el tiempo, gana el que va arriba; si están empatados hay alargue y gana el primero que saque 2 de diferencia.</p>
       <p><b>Faltas:</b> meter la mano pegado al rival, chocar en un tiro o en una bandeja a veces se cobra (no siempre). Si la falta es en el tiro, hay un tiro libre de 1 punto; si encima la metiste, es "y uno". Desde la sexta falta de un jugador, toda falta es tiro libre.</p>
       <p><b>Momentos de definición:</b> en el punto de partido, el alargue o los últimos 10 segundos parejos, la presión achica la franja verde. Los cracks (Manu, Scola, Chapu…) casi no la sienten; vos ganás <b>sangre fría</b> cada vez que la metés en esos momentos.</p>
       <p><b>Bandeja esquivando:</b> si vas a la bandeja o a volcar y el rival salta a taparte, tocá AMAGUE en el aire: cambiás la bandeja y es mucho más difícil que te tapen (entra un poco menos si no tenés buen manejo).</p>
@@ -890,7 +890,7 @@ function readHuman(){const left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys
 function setupMatch(a,b,cfg){
   game.players=[makePlayer(0,a),makePlayer(1,b)];game.court=cfg.court;game.target=cfg.target||11;game.cap=game.target+4;game.rule=cfg.rule||'cambio';game.pendingFT=null;game.adOut=game.adIn=false;['cross','hesi','pump','step','spin'].forEach(k=>game['ad'+k]=false);
   {const pt=save.tend||{};game.tend={};for(const k of ['out','inn','drive','cross','hesi','pump','step','spin','post'])game.tend[k]=Math.round((pt[k]||0)*.4);}
-  game.timeMode=true;game.clock=cfg.time||120;game.target=11;game.cap=15;game.golden=false;game.buzzer=false;game.clutch=false;game.clutchShown=false;
+  game.timeMode=true;game.clock=cfg.time||120;game.target=11;game.cap=999;game.golden=false;game.buzzer=false;game.clutch=false;game.clutchShown=false;
   game.tri=null;game.rain=!!cfg.rain&&cfg.mode!=='demo';game.refMul=cfg.ref!=null&&REFS[cfg.ref]?REFS[cfg.ref][2]:1;game.homeI=cfg.home==='you'?0:cfg.home?1:-1;game.crowd=0;game.mode=cfg.mode||'match';game.cfg=cfg;game.msgs=[];game.parts=[];game.over=false;game.shake=0;bgDirty=true;HOOP.net=0;HOOP.flex=0;
   const first=cfg.first!=null?cfg.first:(rand()<.5?0:1);startCheck(first,true);game.running=true;game.paused=false;
 }
@@ -931,7 +931,7 @@ function onScore(){if(game.phase==='tri'){triScored();return;}if(game.phase!=='p
   if(scorer.ctrl==='human')vibrate(35);
   game.phase='scored';game.timer=1.35;game.noCount=false;game.nextPoss=game.rule==='sigue'?scorer.i:1-scorer.i;}
 function afterScore(){const [a,b]=game.players;
-  const won=p=>{const o=game.players[1-p.i];return (p.score>=game.target&&p.score-o.score>=2)||p.score>=game.cap||(game.golden&&p.score-o.score>=2);};
+  const won=p=>{const o=game.players[1-p.i];return (p.score>=game.target&&p.score-o.score>=2)||(game.golden&&p.score-o.score>=2);};
   if(won(a)||won(b)){endGame();return;}
   if(game.pendingFT!=null){const i=game.pendingFT;game.pendingFT=null;startFT(i,.8);return;}
   if(game.buzzer&&!game.golden){endRegulation();return;}
