@@ -106,7 +106,7 @@ p{margin:0 0 10px;line-height:1.4;max-width:65ch}
 .tag{font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:var(--paint);font-size:14px;margin:0 auto 18px}
 .mbtns{display:grid;gap:10px}
 .mbtns .wide{grid-column:1/-1}
-.menu .mbtns.small{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px}
+.menu .mbtns.small{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:10px}
 .mbtns.small .btn{font-size:16px;padding:11px 8px}
 .pstrip{display:flex;align-items:center;gap:10px;width:100%;background:rgba(11,24,48,.3);border:2px solid rgba(246,241,228,.3);color:var(--chalk);padding:6px 10px;cursor:pointer;text-align:left;margin-bottom:10px;font:600 14px var(--f-ui)}
 .pstrip canvas{width:44px;height:44px;flex:none}
@@ -253,6 +253,14 @@ td.mecell{color:var(--paint)}
 .board div.me{color:var(--paint)}
 .h2h{font-size:13px;font-weight:700;color:var(--chalk);margin-top:4px;line-height:1.35}
 .h2h b{color:var(--paint);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+.goals{margin:10px 0;padding:10px 12px;border:2px solid rgba(255,210,63,.55);background:rgba(11,24,48,.35)}
+.goals>b{display:block;color:var(--paint);text-transform:uppercase;letter-spacing:.08em;font-size:13px;margin-bottom:4px}
+.goals div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-weight:600}.goals div small{color:var(--muted);white-space:nowrap}.goals div.ok span{color:var(--good)}
+.calv{margin:10px 0}.calv>b{display:block;color:var(--paint);text-transform:uppercase;letter-spacing:.08em;font-size:13px;margin-bottom:6px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px;margin-bottom:4px}
+.cc{border:1px solid rgba(246,241,228,.18);padding:3px 2px;text-align:center;min-height:38px;display:flex;flex-direction:column;justify-content:center;background:rgba(11,24,48,.3)}
+.cc small{font-size:11px;color:var(--muted)}.cc b{font-size:12px}.cc.cur{border-color:var(--paint);background:rgba(255,210,63,.18)}.cc.win{background:rgba(61,220,132,.22)}.cc.loss{background:rgba(255,122,106,.2)}.cc.done{opacity:.55}
+.cc.tC small{color:#75aadb}.cc.tE small{color:var(--paint)}
 .iview{margin:12px 0 4px;padding:10px 12px;border:2px solid var(--paint);background:rgba(11,24,48,.5);text-align:left}
 .iview b{color:var(--paint);text-transform:uppercase;letter-spacing:.08em;font-size:13px}
 .iview p{margin:6px 0}
@@ -367,9 +375,8 @@ td.mecell{color:var(--paint)}
         <div class="modec" id="mWorld"></div>
       </div>
       <div class="mbtns small">
-        <button class="btn" data-go="player">Mi jugador<span class="badge" id="ptsBadge" hidden></span></button>
-        <button class="btn" data-go="trophy">Vitrina</button>
-        <button class="btn ghost" data-go="more">Más</button>
+        <button class="btn" data-go="quick">Partido amistoso</button>
+        <button class="btn ghost" data-go="help">Cómo se juega<span class="badge" id="ptsBadge" hidden></span></button>
       </div>
       <div class="menu-foot">
         <button class="chip" id="btnSound">Sonido: sí</button>
@@ -394,6 +401,7 @@ td.mecell{color:var(--paint)}
     <div class="panel wide">
       <button class="chip back" data-go="menu">Volver</button>
       <h2 id="wdTitle">Carrera</h2>
+      <div class="row" style="margin:-4px 0 10px"><button class="chip" data-go="player">Mi jugador</button><button class="chip" data-go="trophy">Vitrina</button></div>
       <div id="wdBody"></div>
     </div>
   </section>
@@ -416,7 +424,7 @@ td.mecell{color:var(--paint)}
 
   <section class="screen" id="s-tourneys" hidden>
     <div class="panel">
-      <button class="chip back" data-go="more">Volver</button>
+      <button class="chip back" data-go="menu">Volver</button>
       <h2>Copas</h2>
       <p class="sub">Tres partidos seguidos por copa. Ganá una para destrabar la siguiente.</p>
       <div class="tlist" id="tlist"></div>
@@ -435,8 +443,10 @@ td.mecell{color:var(--paint)}
 
   <section class="screen" id="s-quick" hidden>
     <div class="panel">
-      <button class="chip back" data-go="more">Volver</button>
-      <h2>Partido rápido</h2>
+      <button class="chip back" data-go="menu">Volver</button>
+      <h2>Partido amistoso</h2>
+      <p class="sub">No cuenta para la carrera. Ideal para practicar o sacarte la espina.</p>
+      <div class="row" id="qRev" style="margin-bottom:8px"></div>
       <h3>Rival</h3>
       <div class="cards" id="qRivals"></div>
       <p class="rdesc" id="qRdesc"></p>
@@ -449,6 +459,10 @@ td.mecell{color:var(--paint)}
       <div class="row" id="qRule"></div>
       <h3>Dificultad</h3>
       <div class="row" id="qDiff"></div>
+      <h3>Árbitro</h3>
+      <div class="row" id="qRef"></div>
+      <h3>Clima (canchas al aire libre)</h3>
+      <div class="row" id="qRain"></div>
       <div class="row" style="margin-top:18px"><button class="btn primary" id="qPlay">Jugar</button></div>
       <p class="note">Homenaje no oficial a jugadores de la Selección Argentina. Alturas aproximadas; niveles y atributos son una estimación del juego.</p>
     </div>
@@ -476,7 +490,7 @@ td.mecell{color:var(--paint)}
 
   <section class="screen" id="s-help" hidden>
     <div class="panel">
-      <button class="chip back" data-go="more">Volver</button>
+      <button class="chip back" data-go="menu">Volver</button>
       <h2>Cómo se juega</h2>
       <p>Un solo aro, mano a mano. Desde adentro de la línea grande el tanto vale <b>1</b>; desde afuera vale <b>2</b>. Se juega a 11 o 2 minutos, lo que llegue primero. Para ganar a 11 hay que sacar 2 de diferencia: si van 11-11, 12-12 o más, se sigue hasta que alguien saque 2 (o hasta que se termine el tiempo). Si se termina el tiempo, gana el que va arriba; si están empatados hay alargue y gana el primero que saque 2 de diferencia.</p>
       <p><b>Faltas:</b> meter la mano pegado al rival, chocar en un tiro o en una bandeja a veces se cobra (no siempre). Si la falta es en el tiro, hay un tiro libre de 1 punto; si encima la metiste, es "y uno". Desde la sexta falta de un jugador, toda falta es tiro libre.</p>
@@ -559,7 +573,7 @@ td.mecell{color:var(--paint)}
 
   <section class="screen" id="s-tri" hidden>
     <div class="panel">
-      <button class="chip back" data-go="more">Volver</button>
+      <button class="chip back" data-go="menu">Volver</button>
       <h2>Concurso de triples</h2>
       <div id="triBody"></div>
     </div>
@@ -936,7 +950,7 @@ function setupMatch(a,b,cfg){
   {const pt=save.tend||{};game.tend={};for(const k of ['out','inn','drive','cross','hesi','pump','step','spin','post'])game.tend[k]=Math.round((pt[k]||0)*.4);}
   game.timeMode=true;game.clock=cfg.time||120;game.target=11;game.cap=999;game.golden=false;game.buzzer=false;game.clutch=false;game.clutchShown=false;
   game.tri=null;game.rain=!!cfg.rain&&cfg.mode!=='demo';game.refMul=cfg.ref!=null&&REFS[cfg.ref]?REFS[cfg.ref][2]:1;game.homeI=cfg.home==='you'?0:cfg.home?1:-1;game.crowd=0;game.mode=cfg.mode||'match';game.cfg=cfg;game.msgs=[];game.parts=[];game.over=false;game.shake=0;bgDirty=true;HOOP.net=0;HOOP.flex=0;
-  ZR=save&&save.d3?320:280;game.adjDone=false;game.players.forEach(p=>{p.plan=null;});if(game.mode==='match'&&cfg.rival&&game.players[1].ctrl==='ai'&&game.players[0].ctrl==='human')game.players[1].plan=makePlan(game.players[1],game.players[0],cfg);
+  ZR=save&&save.d3?320:280;game.adjDone=false;game.players.forEach(p=>{p.plan=null;});if(game.mode==='match'&&cfg.load>=4&&game.players[0].ctrl==='human')game.players[0].fat=Math.min(.4,(cfg.load-3)*.1);if(game.mode==='match'&&cfg.train&&game.players[0].ctrl==='human')game.players[0].win*=1.1;if(game.mode==='match'&&cfg.rival&&game.players[1].ctrl==='ai'&&game.players[0].ctrl==='human')game.players[1].plan=makePlan(game.players[1],game.players[0],cfg);
   const first=cfg.first!=null?cfg.first:(rand()<.5?0:1);startCheck(first,true);game.running=true;game.paused=false;
 }
 function startCheck(i,opening){const a=game.players[i],d=game.players[1-i];resetP(a);resetP(d);
@@ -1013,6 +1027,9 @@ function makePlan(p,o,cfg){const rid=cfg.rival,r=RIVALS[rid]||{},st=r.style&&PLA
   if(cfg.clasico){P.stealM*=1.2;p.ai=Object.assign({},p.ai,{iq:Math.min(1,(p.ai.iq||.5)+.08)});P.lines.push('<b>Clásico</b> Sale con todo: más intenso y más atento.');}
   if((save.provoke||{})[rid]){P.stealM*=1.15;p.ai=Object.assign({},p.ai,{iq:Math.min(1,(p.ai.iq||.5)+.06)});P.lines.push('<b>Picado</b> Viene caliente por lo que dijiste en la entrevista.');}
   if(cfg.taunt)P.lines.push(`<b>Antes del partido</b> ${cfg.taunt}`);
+  if(cfg.hist)P.lines.push(`<b>Historial</b> ${cfg.hist}`);
+  if(cfg.load>=4)P.lines.push(`<b>Tus piernas</b> Llegás cargado de partidos: arrancás con algo de cansancio. Simular un partido te deja descansar.`);
+  if(cfg.train)P.lines.push(`<b>Entrenamiento</b> Llegás en ritmo: tu franja verde es un poco más ancha este partido.`);
   return P;}
 function aiAdjust(){const hu=game.players[0],ai=game.players[1];if(!ai||ai.ctrl!=='ai'||hu.ctrl!=='human'||!ai.plan)return;game.adjDone=true;const P=ai.plan,hs=hu.stats;const parts=[];
   if(hs.om>=2&&hs.om*1.6>=hs.im&&P.def!=='closeOut'){P.def='closeOut';P.gapOut=-.35*PPM;P.gapIn=0;parts.push('te sale a tapar el tiro de afuera');}
@@ -1020,6 +1037,12 @@ function aiAdjust(){const hu=game.players[0],ai=game.players[1];if(!ai||ai.ctrl!
   if(ai.score<=hu.score-3){P.driveM*=1.15;P.stealM*=1.25;parts.push('sube la presión');}
   else if(ai.stats.oa>=4&&ai.stats.om/ai.stats.oa<.25){P.shootM*=.7;P.driveM*=1.2;parts.push('deja de tirar de afuera y te encara');}
   if(parts.length){const tk=ai.name.split(' '),n=tk[tk.length-1].length<=2?ai.name:tk[tk.length-1];bigMsg('AJUSTE DE '+n,parts.join(' y ').replace(/^./,c=>c.toUpperCase()),'#75aadb',2);comment([`${n} cambia el plan: ${parts[0]}.`]);}}
+const MILES=[['gp',[10,50,100,250,500],'partidos jugados'],['w',[10,50,100,250],'partidos ganados'],['pts',[100,500,1000,2500,5000],'puntos'],['om',[25,100,250,500],'dobles de afuera'],['dnk',[10,50,100,250],'volcadas'],['blk',[10,50,100,250],'tapones'],['stl',[25,100,250],'robos']];
+function checkMiles(a){const S=save.stats||{},M=save.miles||(save.miles={}),out=[];if(game.cfg&&game.cfg.tri)return out;
+  for(const [k,th,lbl] of MILES)for(const t of th){const key=k+t;if(!M[key]&&(S[k]||0)>=t){M[key]=1;celebrate(`${t} ${lbl}`,'Un nuevo hito en tu carrera','star','#3ddc84','HITO DE CARRERA');if(save.world)addNews(save.world,`${nT('you')} llegó a los ${t} ${lbl}`,'Un número redondo para su carrera.','you');}}
+  const PB=save.pb||(save.pb={}),L={pts:'puntos',reb:'rebotes',stl:'robos',blk:'tapones',dnk:'volcadas',om:'dobles de afuera'};
+  if((S.gp||0)>3)for(const k in L){const v=a.stats[k]||0;if(v>0&&v>(PB[k]||0)){out.push(`Récord personal: ${v} ${L[k]}`);}}
+  for(const k in L){const v=a.stats[k]||0;if(v>(PB[k]||0))PB[k]=v;}return out;}
 function scoutSave(rid,hu){if(!rid)return;const SC=save.scout||(save.scout={}),o=SC[rid]||{gp:0,oa:0,om:0,ia:0,im:0,mv:{}},d=.6,s=hu.stats;
   const n={gp:o.gp+1,oa:o.oa*d+s.oa,om:o.om*d+s.om,ia:o.ia*d+s.ia,im:o.im*d+s.im,mv:{}};for(const k in MV_NAME)n.mv[k]=+(((o.mv||{})[k]||0)*d+(s['t_'+k]||0)).toFixed(2);
   ['oa','om','ia','im'].forEach(k=>n[k]=+n[k].toFixed(2));SC[rid]=n;}
@@ -2420,7 +2443,8 @@ function cupPlayRound(w,my){const R=w.cup.rounds[w.cup.r],win=[];
   R.pairs.forEach(([a,b],i)=>{let sa,sb;if(my&&(a==='you'||b==='you')){sa=a==='you'?my.s:my.o;sb=a==='you'?my.o:my.s;}else[sa,sb]=wPlay(w,a,b);R.res[i]=[sa,sb];win.push(sa>sb?a:b);});
   win.push(...(R.byes||[]));w.cup.r++;if(win.length>1)buildCupRound(w,win);else w.cup.champ=win[0];return {R,win};}
 function wSim(w,a,b){return simGame(a,b,11,w.time,id=>wStats(w,id));}
-function wLine(w,id,pts,real){const P=w.ps[id]||(w.ps[id]={gp:0,pts:0,w:0,stl:0,blk:0,reb:0});P.gp++;P.pts+=pts;
+function simOm(w,id,pts){const S=wStats(w,id),f=clamp((S.three-.3)*1.1,.05,.7);return Math.max(0,Math.min(Math.floor(pts/2),Math.round(pts*f/2+randn()*.8)));}
+function wLine(w,id,pts,real){const P=w.ps[id]||(w.ps[id]={gp:0,pts:0,w:0,stl:0,blk:0,reb:0});P.gp++;P.pts+=pts;P.om=(P.om||0)+(real&&real.om!=null?real.om:simOm(w,id,pts));
   if(real){P.stl+=real.stl||0;P.blk+=real.blk||0;P.reb+=real.reb||0;}else{const S=wStats(w,id);P.stl+=Math.round(rand()*S.steal*4.5);P.blk+=Math.round(rand()*S.block*3.5);P.reb+=Math.round(2+rand()*(S.jump+S.close)*4);}}
 function wTab(w,d,a,b,sa,sb){const T=w.table[d],A=T[a],B=T[b];A.pj++;B.pj++;A.pf+=sa;A.pc+=sb;B.pf+=sb;B.pc+=sa;if(sa>sb){A.g++;B.p++;w.ps[a].w++;}else{B.g++;A.p++;w.ps[b].w++;}streakUpd(w,a,b,sa,sb);}
 function wStand(w,d){return Object.entries(w.table[d]).map(([id,x])=>Object.assign({id},x)).sort((x,y)=>y.g-x.g||(y.pf-y.pc)-(x.pf-x.pc)||y.pf-x.pf);}
@@ -2533,7 +2557,20 @@ function wAwards(w,d){const ids=w.divs[d].filter(id=>w.ps[id]&&w.ps[id].gp),P=w.
   const mvp=best(k=>T[k].g*2+ppg(k)+dpg(k)*1.2),scorer=best(k=>P[k].pts),def=best(dpg);
   return {mvp,scorer,def,pts:P[scorer].pts,dpg:dpg(def).toFixed(1)};}
 function at(w,id){return w.allTime[id]||(w.allTime[id]={seasons:0,gp:0,pts:0,w:0,lt:0,cups:0,mvp:0,top:0,def:0,best:9});}
-function endWorldSeason(w){const msgs=[];let g0=0;while(!w.cup.champ&&w.cup.rounds[w.cup.r]&&g0++<10)cupPlayRound(w,null);const DI=[...Array(ND).keys()],st=DI.map(d=>wStand(w,d)),aw=DI.map(d=>wAwards(w,d));const ovr0=ovr(humanStats());
+function seasonGoals(w){if(w.goals&&w.goals.s===w.season)return w.goals;const d=divOf(w,'you'),ids=w.divs[d],me=ovr(wStats(w,'you')),rk=ids.filter(id=>ovr(wStats(w,id))>me).length+1;
+  const L=[];if(d===0)L.push(rk<=4?{k:'top',n:2,t:'Terminar entre los 2 primeros de la NBA'}:{k:'top',n:6,t:'Entrar a los playoffs de la NBA (top 6)'});
+  else if(rk<=3)L.push({k:'top',n:2,t:'Ascender: terminar 1º o 2º'});else if(rk<=7)L.push({k:'top',n:6,t:'Meterte en el play-in (top 6)'});else L.push({k:'top',n:8,t:'Salvarte del descenso (no terminar 9º ni 10º)'});
+  L.push({k:'cupW',n:2,t:'Ganar 2 partidos de Copa Argentina'});
+  srand(w.season*31+d*7);const P=[{k:'stk',n:4,t:'Ganar 4 partidos seguidos'},{k:'om',n:12,t:'Meter 12 dobles de afuera en la temporada'},{k:'ppg',n:7,t:'Promediar 7 puntos por partido'},{k:'clas',n:1,t:'Ganar un clásico'}];L.push(P[Math.floor(sr()*P.length)]);
+  w.goals={s:w.season,list:L};return w.goals;}
+function goalState(w,g,final){const d=divOf(w,'you'),G=w.gst&&w.gst.s===w.season?w.gst:{cupW:0,clas:0,maxStk:0},P=w.ps.you||{gp:0,pts:0,om:0};
+  if(g.k==='top'){const pos=wStand(w,d).findIndex(x=>x.id==='you')+1;return {ok:pos<=g.n,prog:`vas ${pos}º`,fin:final};}
+  if(g.k==='cupW')return {ok:G.cupW>=g.n,prog:`${G.cupW}/${g.n}`};if(g.k==='stk')return {ok:G.maxStk>=g.n,prog:`mejor racha ${Math.max(0,G.maxStk)}`};
+  if(g.k==='om')return {ok:(P.om||0)>=g.n,prog:`${P.om||0}/${g.n}`};if(g.k==='ppg'){const v=P.gp?P.pts/P.gp:0;return {ok:P.gp>=3&&v>=g.n,prog:v.toFixed(1)+' por partido'};}
+  if(g.k==='clas')return {ok:G.clas>=g.n,prog:G.clas?'¡logrado!':'pendiente'};return {ok:false,prog:''};}
+function goalsHTML(w){const G=seasonGoals(w);return `<div class="goals"><b>Objetivos de la temporada</b>${G.list.map(g=>{const s=goalState(w,g);return `<div class="${s.ok?'ok':''}"><span>${s.ok?'✓':'○'} ${g.t}</span><small>${s.prog}</small></div>`;}).join('')}<small class="sub">Cada objetivo cumplido al final de la temporada sube un poco tu nivel.</small></div>`;}
+function endWorldSeason(w){const msgs=[];{const myD0=divOf(w,'you');if(myD0>=0){const GG=seasonGoals(w),res=GG.list.map(g=>({t:g.t,ok:goalState(w,g,true).ok}));res.forEach(r=>{if(r.ok){w.drift.you=Math.min(.3,(w.drift.you||0)+.003);msgs.push('Objetivo cumplido: '+r.t);}});
+    const P=w.ps.you||{gp:0,pts:0},T=w.table[myD0].you,G=w.gst&&w.gst.s===w.season?w.gst:{};w.mySum={s:w.season,d:myD0,g:T.g,p:T.p,ppg:P.gp?(P.pts/P.gp).toFixed(1):'0',om:P.om||0,stl:P.stl||0,blk:P.blk||0,best:G.best||null,goals:res,ovr0:Math.round(ovr(humanStats())*99)};}}let g0=0;while(!w.cup.champ&&w.cup.rounds[w.cup.r]&&g0++<10)cupPlayRound(w,null);const DI=[...Array(ND).keys()],st=DI.map(d=>wStand(w,d)),aw=DI.map(d=>wAwards(w,d));const ovr0=ovr(humanStats());
   const myD=divOf(w,'you'),myPos=st[myD].findIndex(x=>x.id==='you')+1;
   for(let d=0;d<ND;d++)for(const x of st[d]){const A=at(w,x.id),P=w.ps[x.id]||{gp:0,pts:0,w:0};A.seasons++;A.gp+=P.gp;A.pts+=P.pts;A.w+=P.w;A.best=Math.min(A.best,d);if(d===0)A.nba=(A.nba||0)+1;}
   const CH=st.map(s=>s[0].id);if(w.nbapo&&w.nbapo.s===w.season&&w.nbapo.champ)CH[0]=w.nbapo.champ;const MU=w.mundo&&w.mundo.s===w.season?w.mundo.champ:null;
@@ -2587,13 +2624,14 @@ function renderWorld(){const body=$('#wdBody'),w=save.world;if(w&&w.divs)storyCh
     $('#wdStart').onclick=()=>{save.world=newWorld(cfg.mode);worldTab='temp';persist();renderWorld();};return;}
   const myD=divOf(w,'you');if(worldDiv===null)worldDiv=myD;
   $('#wdTitle').textContent=`Temporada ${w.season} · ${DIVS[myD]}`;
-  const tabs=[['temp','Temporada'],['diario','Diario'],['tablas','Tablas'],['copa','Copa Argentina'],['stats','Estadísticas'],['palm','Palmarés']];
+  const tabs=[['temp','Temporada'],['diario','Diario'],['tablas','Tablas'],['copa','Copa Argentina'],['stats','Estadísticas'],['amigos','Amigos'],['palm','Palmarés']];
   let h=`<div class="row tabs" id="wdTabs"></div>`;
   if(worldTab==='temp')h+=wTempHTML(w,myD);
   else if(worldTab==='tablas')h+=`<div class="row" id="wdDivs" style="margin:10px 0"></div>`+wTableHTML(w,worldDiv);
   else if(worldTab==='copa')h+=wCupHTML(w);
   else if(worldTab==='diario')h+=wDiarioHTML(w);
   else if(worldTab==='stats')h+=`<div class="row" id="wdSDiv" style="margin:10px 0"></div>`+wStatsHTML(w);
+  else if(worldTab==='amigos')h+=wAmigosHTML(w);
   else h+=wPalmHTML(w);
   if(worldTab==='temp')h+=`<div class="row" style="margin-top:16px"><button class="chip" id="wdQuit">Borrar esta carrera</button><span class="sub" id="wdQuitMsg"></span></div>`;
   body.innerHTML=h;
@@ -2602,13 +2640,15 @@ function renderWorld(){const body=$('#wdBody'),w=save.world;if(w&&w.divs)storyCh
   if($('#wdSDiv'))chipRow($('#wdSDiv'),[[-1,'Todas'],...DIVSH.map((n,i)=>[i,n])],worldStatDiv,v=>{worldStatDiv=v;renderWorld();});
   const nx=worldNext(w),box=body.querySelector('#lgNext');
   if(box&&nx&&!nx.none){const r=RIVALS[nx.opp];box.appendChild(portrait(r.look));const d=document.createElement('div');d.style.minWidth='0';
-    d.innerHTML=`<div class="ds">${isClasico(w,nx.opp)?'<b style="color:#ff7a6a">⚔ CLÁSICO</b> · ':''}${nx.home==='you'?'De local · ':nx.home?'De visitante · ':''}${formTxt()?formTxt()+' · ':''}${nx.label}${((save.nem||{})[nx.opp]||0)>=2?' · <b style="color:#ff7a6a">TU BESTIA NEGRA</b>':''}</div><div class="nm">vs ${r.name}</div><div class="ds">${DIVSH[divOf(w,nx.opp)]} · ${TIERS[r.tier].name} · ${COURTS[nx.court].name}</div><div class="h2h"><b>Mano a mano</b> · ${h2hLine(nx.opp,w)}</div>${w.inj&&w.inj[nx.opp]?`<div class="h2h" style="color:#ff9a8a">Viene con molestias: ${INJ_LBL[w.inj[nx.opp].k]}</div>`:''}${save.injury&&save.injury.games>0?`<div class="h2h" style="color:#ff9a8a">Vos jugás con molestias: ${INJ_LBL[save.injury.k]} (${save.injury.games} partido${save.injury.games>1?'s':''})</div>`:''}`;box.appendChild(d);
+    d.innerHTML=`<div class="ds">${isClasico(w,nx.opp)?'<b style="color:#ff7a6a">⚔ CLÁSICO</b> · ':''}${nx.home==='you'?'De local · ':nx.home?'De visitante · ':''}${formTxt()?formTxt()+' · ':''}${nx.label}${((save.nem||{})[nx.opp]||0)>=2?' · <b style="color:#ff7a6a">TU BESTIA NEGRA</b>':''}</div><div class="nm">vs ${r.name}</div><div class="ds">${DIVSH[divOf(w,nx.opp)]} · ${TIERS[r.tier].name} · ${COURTS[nx.court].name}</div><div class="h2h"><b>Mano a mano</b> · ${h2hLine(nx.opp,w)}</div>${(()=>{const l=lastVs(w,nx.opp);return l?`<div class="h2h">Última vez: ${l.s>l.r?'ganaste':'perdiste'} ${l.s}-${l.r} (temporada ${l.season})</div>`:'';})()}${(w.load||0)>=4?'<div class="h2h" style="color:#ffb347">Piernas cargadas: simular un partido te deja descansar.</div>':''}${w.inj&&w.inj[nx.opp]?`<div class="h2h" style="color:#ff9a8a">Viene con molestias: ${INJ_LBL[w.inj[nx.opp].k]}</div>`:''}${save.injury&&save.injury.games>0?`<div class="h2h" style="color:#ff9a8a">Vos jugás con molestias: ${INJ_LBL[save.injury.k]} (${save.injury.games} partido${save.injury.games>1?'s':''})</div>`:''}`;box.appendChild(d);
     const b=document.createElement('button');b.className='btn primary';
     if(nx.wo==='me'){b.textContent='Perder 5-0';d.insertAdjacentHTML('beforeend',`<div class="h2h" style="color:#ff9a8a">Estás lesionado (te ${w.out.you>1?'quedan '+w.out.you+' partidos':'queda 1 partido'} afuera): este partido lo perdés 5-0.</div>`);b.onclick=()=>{const r=worldAdvance(w,{s:0,o:5,ms:{},os:null,wo:true});if(r)toast(r);renderWorld();};}
     else if(nx.wo==='opp'){b.textContent='Ganar 5-0';d.insertAdjacentHTML('beforeend',`<div class="h2h" style="color:var(--good)">Tu rival está lesionado: ganás 5-0 sin jugar.</div>`);b.onclick=()=>{const r=worldAdvance(w,{s:5,o:0,ms:{},os:null,wo:true});if(r)toast(r);renderWorld();};}
     else{b.textContent='Jugar';b.onclick=()=>startMatch(worldMatchCfg(w,nx));}box.appendChild(b);
-    if(!nx.wo){const sb=document.createElement('button');sb.className='chip';sb.textContent='Simular';sb.title='Se juega solo según tu nivel (un poco más difícil que jugándolo)';sb.onclick=()=>{const r=simMyMatch(w,nx);toast(r.length>60?'Partido simulado':r);w.lastSim=r;renderWorld();};box.appendChild(sb);}}
-  const sk=$('#wdSkip');if(sk)sk.onclick=()=>{worldAdvance(w,null);renderWorld();};
+    if(!nx.wo){const tb=save.trainBuff&&save.trainBuff.s===w.season&&save.trainBuff.step===w.step;const tr=document.createElement('button');tr.className='chip';tr.textContent=tb?'✓ En ritmo':(save.trainTry&&save.trainTry.s===w.season&&save.trainTry.step===w.step?'Ya entrenaste':'Entrenar');tr.title='Práctica de tiro opcional: si metés 4 de 6, llegás en ritmo al partido';tr.disabled=!!(tb||(save.trainTry&&save.trainTry.s===w.season&&save.trainTry.step===w.step));tr.onclick=()=>{save.trainTry={s:w.season,step:w.step};persist();startTri({train:true,court:nx.court});};box.appendChild(tr);}
+    if(!nx.wo){const sb=document.createElement('button');sb.className='chip';sb.textContent='Simular';sb.title='Se juega solo según tu nivel (un poco más difícil que jugándolo)';sb.onclick=()=>{const r=simMyMatch(w,nx);toast(r.length>60?'Partido simulado':r);w.lastSim=r;renderWorld();};box.appendChild(sb);}
+    {const chips=[...box.querySelectorAll(':scope>.chip')];if(chips.length){const cr=document.createElement('div');cr.className='row';cr.style.cssText='gap:8px;grid-column:1/-1;margin-top:6px';chips.forEach(x=>cr.appendChild(x));box.appendChild(cr);}}}
+  const sk=$('#wdSkip');if(sk)sk.onclick=()=>{w.load=Math.max(0,(w.load||0)-1);worldAdvance(w,null);renderWorld();};
   if($('#wdNS')){const ss=[...new Set((w.news||[]).map(n=>n.s))].sort((a,b)=>b-a);chipRow($('#wdNS'),ss.map(x=>[x,'Temporada '+x]),newsSeasonSel||ss[0],v=>{newsSeasonSel=v;renderWorld();});}
   const at1=$('#asgTri');if(at1)at1.onclick=()=>startTri({asg:true});
   const ap=$('#asgPlay');if(ap)ap.onclick=()=>{const opp=ap.dataset.opp;startMatch({rival:opp,court:'estadio',target:11,time:w.time,rule:'cambio',diff:DIVDIFF[divOf(w,opp)]+.04+((w.drift[opp]||0)/.07),world:true,asg:true,stageLabel:'Juego de las Estrellas · '+ap.dataset.round});};
@@ -2621,29 +2661,43 @@ function renderWorld(){const body=$('#wdBody'),w=save.world;if(w&&w.divs)storyCh
 const TAUNTS=['"Hoy te voy a dar una lección."','"Que no se le suba a la cabeza, todavía no me ganó nada."','"Lo estuve mirando. Ya sé lo que hace."','"Le tengo ganas. Mucha gente va a ver quién manda."','"Que venga con ganas, porque yo vengo con hambre."'];
 function worldMatchCfg(w,nx){const cl=isClasico(w,nx.opp),pv=!!(save.provoke||{})[nx.opp];let taunt=null;
   if(cl||pv){const r=RIVALS[nx.opp];taunt=(r?r.name:'El rival')+': '+(pv?'"Habló mucho en la entrevista. Hoy le contesto en la cancha."':TAUNTS[Math.floor(rand()*TAUNTS.length)]);}
-  return {rival:nx.opp,court:nx.court,target:11,time:w.time,rule:'cambio',diff:nx.diff+((w.drift[nx.opp]||0)/.07)+(pv?.4:0),world:true,stageLabel:nx.label,home:nx.home||null,clasico:cl,wtype:nx.type,taunt};}
+  const last=lastVs(w,nx.opp),hist=last?`La última vez ${last.s>last.r?'ganaste':'perdiste'} ${last.s}-${last.r} (temporada ${last.season}).`:null;
+  const tb=save.trainBuff&&save.trainBuff.s===w.season&&save.trainBuff.step===w.step?save.trainBuff.k:null;
+  return {rival:nx.opp,court:nx.court,target:11,time:w.time,rule:'cambio',diff:nx.diff+((w.drift[nx.opp]||0)/.07)+(pv?.4:0),world:true,stageLabel:nx.label,home:nx.home||null,clasico:cl,wtype:nx.type,taunt,hist,load:w.load||0,train:tb};}
+function lastVs(w,opp){let b=null;for(const k in (w.myRes||{})){const r=w.myRes[k];if(r.o!==opp)continue;const [se,st]=k.split(':').map(Number);if(!b||se>b.season||(se===b.season&&st>b.step))b={s:r.s,r:r.r,season:se,step:st};}return b;}
+function legsTxt(w){const l=w.load||0;return l>=5?'Muy cargadas':l>=4?'Cargadas':l>=2?'Normales':'Frescas';}
 function resList(res){return `<div class="results">${res.map(r=>{const aw=r.sa>r.sb;return `<div><span class="${aw?'w':'lo'}">${nm(r.a)}</span><span>${r.sa} – ${r.sb}</span><span class="${aw?'lo':'w'}">${nm(r.b)}</span></div>`;}).join('')}</div>`;}
 function wTempHTML(w,myD){let h='';
   const st=wStand(w,myD),pos=st.findIndex(x=>x.id==='you')+1;
   if(w.phase==='done'){const S=w.summary;
     h+=`<div class="champ"><span class="sub">Fin de la temporada ${w.season}</span><b>${pos}º en ${DIVSH[S.myD]}</b><span>Copa Argentina: ${w.myCupStage==='Campeón'?'¡Campeón!':'llegaste hasta '+w.myCupStage}</span></div>`;
     if(S.msgs.length)h+=`<p class="reward">${S.msgs.join(' · ')}</p>`;
+    h+=mySumHTML(w);
     h+=`<h3>Campeones</h3><div class="tiles">${(S.champs||S.st.map(s=>s[0])).map((c,d)=>`<div><span>${DIVS[d]}</span><b>${nm(c)}</b></div>`).join('')}${S.mundo?`<div><span>Final del Mundo</span><b>${nm(S.mundo)}</b></div>`:''}<div><span>Copa Argentina</span><b>${nm(w.cup.champ)}</b></div><div><span>Jugador del año</span><b>${S.aw[0]?nm(S.aw[0].mvp):'—'}</b></div></div>`;
     h+=`<h3>Ascensos y descensos</h3><div class="results">${[1,2,3,4].map(d=>`<div><span class="w">Suben a ${DIVSH[d-1]}: ${S.up[d].map(nm).join(', ')}</span></div><div><span class="lo">Bajan a ${DIVSH[d]}: ${S.down[d-1].map(nm).join(', ')}</span></div>`).join('')}</div>`;
     if(S.promo&&S.promo.length)h+=`<h3>Promociones</h3><div class="results">${S.promo.map(x=>`<div><span class="${x.win===x.a?'w':'lo'}">${nm(x.a)} <small class="sub">${DIVSH[x.d]}</small></span><span>${x.wa} – ${x.wb}</span><span class="${x.win===x.b?'w':'lo'}">${nm(x.b)} <small class="sub">${DIVSH[x.d-1]}</small></span></div>`).join('')}</div>`;
     h+=`<div class="row" style="margin-top:14px"><button class="btn primary" id="wdNew">Empezar temporada ${w.season+1}</button></div>`;return h;}
   const nx=worldNext(w);
-  h+=`<div class="tiles"><div><span>Tu puesto</span><b>${pos}º de 10</b></div><div><span>Récord</span><b>${w.table[myD].you.g}-${w.table[myD].you.p}</b></div><div><span>Copa Argentina</span><b>${w.cup.rounds[w.cup.r]&&w.cup.rounds[w.cup.r].pairs.some(m=>m.includes('you'))?'En '+w.cup.rounds[w.cup.r].name:w.myCupStage==='Campeón'?'Campeón':(w.cup.rounds.slice(0,w.cup.r).some(R=>R.pairs.some(m=>m.includes('you')))?'Eliminado en '+w.myCupStage:'Entrás más adelante')}</b></div><div><span>Jornada</span><b>${w.step+1} de ${cal(w).length}</b></div><div><span>Tu categoría</span><b>${CATS[wCat(w,'you')][0]}</b></div><div><span>Tu media</span><b>${Math.round(ovr(humanStats())*99)}</b></div></div>`;
-  const ln=(w.news||[]).filter(n=>n.s===w.season).slice(-1)[0];if(ln)h+=`<div class="lastnews"><small>El Diario del Ascenso</small><b>${ln.t}</b></div>`;
   if(nx&&nx.type==='E')h+=asgHTML(w);
   else if(nx&&!nx.none)h+=`<div class="nextm" id="lgNext"></div>`;
   else if(nx)h+=`<div class="nextm"><div></div><div style="min-width:0"><div class="ds">${nx.label}</div><div class="nm">No jugás esta ronda</div><div class="ds">${nx.promo?(nx.type==='N'?'No estás en los playoffs de la NBA.':nx.type==='M'?'No te clasificaste a la Final del Mundo.':'Mirá cómo sale el play-in y la promoción de tu división.'):nx.bye?'Tenés pase directo a la ronda siguiente.':!cupSeen(w).has('you')?'Entrás más adelante: cada división entra en una ronda distinta.':'Quedaste afuera de la Copa.'}</div></div><button class="btn primary" id="wdSkip">Simular ronda</button></div>`;
-  h+=`<p class="sub" style="font-size:14px">Calendario: ${(()=>{const C=cal(w),g=[];C.forEach((e,i)=>{const L=g[g.length-1];if(L&&L.e===e&&'PSNM'.includes(e)){L.to=i;}else g.push({e,from:i,to:i});});
-    return g.map(x=>`<b style="color:${w.step>=x.from&&w.step<=x.to?'var(--paint)':w.step>x.to?'var(--good)':'var(--muted)'}">${{L:'Liga',C:'Copa',E:'Estrellas',P:'Play-in',S:'Promoción',N:'Playoffs NBA',M:'Final del Mundo'}[x.e]}</b>`).join(' · ');})()}</p>`;
+  h+=goalsHTML(w)+calHTML(w);
+  h+=`<div class="tiles"><div><span>Tu puesto</span><b>${pos}º de 10</b></div><div><span>Récord</span><b>${w.table[myD].you.g}-${w.table[myD].you.p}</b></div><div><span>Copa Argentina</span><b>${w.cup.rounds[w.cup.r]&&w.cup.rounds[w.cup.r].pairs.some(m=>m.includes('you'))?'En '+w.cup.rounds[w.cup.r].name:w.myCupStage==='Campeón'?'Campeón':(w.cup.rounds.slice(0,w.cup.r).some(R=>R.pairs.some(m=>m.includes('you')))?'Eliminado en '+w.myCupStage:'Entrás más adelante')}</b></div><div><span>Jornada</span><b>${w.step+1} de ${cal(w).length}</b></div><div><span>Tu categoría</span><b>${CATS[wCat(w,'you')][0]}</b></div><div><span>Tu media</span><b>${Math.round(ovr(humanStats())*99)}</b></div><div><span>Piernas</span><b>${legsTxt(w)}</b></div><div><span>Racha</span><b>${(()=>{const F=save.form||{};return F.streak>0?F.streak+(F.streak>1?' ganados':' ganado'):F.streak<0?(-F.streak)+(F.streak<-1?' perdidos':' perdido'):'—';})()}</b></div></div>`;
+  const ln=(w.news||[]).filter(n=>n.s===w.season).slice(-1)[0];if(ln)h+=`<div class="lastnews"><small>El Diario del Ascenso</small><b>${ln.t}</b></div>`;
+
   h+=mundoHTML(w)+nbaHTML(w)+promoHTML(w);
   if(w.lastSim&&w.phase==='season'){h+=`<p class="lastnews"><small>Tu partido simulado</small><b>${w.lastSim}</b></p>`;w.lastSim=null;}
   if(w.last)h+=`<h3>${w.last.title}</h3>`+resList(w.last.res);
   h+=`<h3>Tabla · ${DIVS[myD]}</h3>`+wTableHTML(w,myD,true);return h;}
+function calHTML(w){const C=cal(w);let li=0,ci=0;const G=[];C.forEach((e,i)=>{const L=G[G.length-1];if(L&&L.e===e&&'PSNM'.includes(e))L.to=i;else G.push({e,from:i,to:i});});
+  const cells=G.map(g=>{const e=g.e,i=g.from,multi=g.to>g.from;let lab=e==='L'?'F'+(++li):e==='C'?'C'+(++ci):{E:'★',P:'Play-in',S:'Promoción',N:'Playoffs NBA',M:'Final del Mundo'}[e];
+    let r=null;for(let k=g.from;k<=g.to;k++){const x=(w.myRes||{})[w.season+':'+k];if(x)r=x;}const cur=w.step>=g.from&&w.step<=g.to;
+    const cls=cur?'cur':w.step>g.to?(r&&!multi?(r.s>r.r?'win':'loss'):'done'):'';return `<div class="cc ${cls} t${e}" style="${multi?'grid-column:span 2':''}" title="${r?`${r.s}-${r.r} vs ${teamName(r.o)}`:''}"><small>${lab}</small>${r&&!multi?`<b>${r.s}-${r.r}</b>`:cur?'<b>HOY</b>':''}</div>`;}).join('');
+  return `<div class="calv"><b>Calendario</b><div class="cgrid">${cells}</div><small class="sub">F = fecha de liga · C = Copa Argentina · ★ = fin de semana de las Estrellas</small></div>`;}
+function wAmigosHTML(w){const rows=AMIGOS.map(([id])=>id).filter(id=>RIVALS[id]);return `<p class="sub">Así les va a los amigos con los que arrancaste.</p><div class="tblwrap"><table><thead><tr><th class="l">Amigo</th><th class="l">División</th><th class="l">Categoría</th><th>Media</th><th>G-P</th><th class="l">Títulos</th></tr></thead><tbody>${rows.map(id=>{const d=divOf(w,id),T=d>=0&&w.table[d]?w.table[d][id]:null,TT=worldTitles(w,id),nl=TT.lig.reduce((a,b)=>a+b.length,0);
+    return `<tr><td class="l">${nm(id)}</td><td class="l">${d>=0?DIVSH[d]:'—'}</td><td class="l">${catTag(wCat(w,id))}</td><td>${Math.round(wOvr(w,id)*99)}</td><td>${T?T.g+'-'+T.p:'—'}</td><td class="l">${nl?nl+' liga'+(nl>1?'s':''):''}${TT.cup.length?' · '+TT.cup.length+' copa':''}</td></tr>`;}).join('')}</tbody></table></div>`;}
+function mySumHTML(w){const M=w.mySum;if(!M||M.s!==w.season)return '';return `<h3>Tu temporada</h3><div class="tiles"><div><span>Récord</span><b>${M.g}-${M.p}</b></div><div><span>Puntos por partido</span><b>${M.ppg}</b></div><div><span>Dobles de afuera</span><b>${M.om}</b></div><div><span>Robos · tapones</span><b>${M.stl} · ${M.blk}</b></div>${M.best?`<div><span>Mejor partido</span><b>${M.best.s}-${M.best.r} vs ${teamName(M.best.o)}</b></div>`:''}</div>
+  <div class="goals"><b>Objetivos</b>${M.goals.map(g=>`<div class="${g.ok?'ok':''}"><span>${g.ok?'✓':'✗'} ${g.t}</span></div>`).join('')}</div>`;}
 function wTableHTML(w,d,compact){const st=wStand(w,d);
   return `<div class="tblwrap"><table><thead><tr><th>#</th><th class="l">Jugador</th><th>PJ</th><th>G</th><th>P</th>${compact?'':'<th>PF</th><th>PC</th>'}<th>DIF</th></tr></thead><tbody>${st.map((s,i)=>{
     const zone=i===0?'z-champ':(i<2&&d>0)?'z-up':(i>=8&&d<LASTD)?'z-down':(i>=2&&i<=5&&d>0)?'z-po':(i===7&&d<LASTD)?'z-pr':'';
@@ -2757,7 +2811,7 @@ function ensureAsg(w){if(w.asg&&w.asg.s===w.season){const A=w.asg;
     if(!A.v2&&!A.final&&!A.champ&&A.semis.every(s=>!s.r)){A.v2=true;const st=asgStars(w);A.stars=st;A.semis=[{a:st[0],b:st[3],r:null},{a:st[1],b:st[2],r:null}];}
     return A;}
   const stars=asgStars(w);
-  const shooters=w.divs.map(d=>d.slice().sort((a,b)=>wStats(w,b).three-wStats(w,a).three)[0]),youIn=shooters.includes('you');
+  const omOf=id=>(w.ps[id]&&w.ps[id].om)||0;const shooters=w.divs.map(d=>d.slice().sort((a,b)=>omOf(b)-omOf(a)||wStats(w,b).three-wStats(w,a).three)[0]),youIn=shooters.includes('you');
   const triAI={};shooters.forEach(id=>{if(id!=='you')triAI[id]=triSim(wStats(w,id));});
   w.asg={s:w.season,v2:true,shooters,youTri:youIn,stars,semis:[{a:stars[0],b:stars[3],r:null},{a:stars[1],b:stars[2],r:null}],final:null,champ:null,triAI,tri:null,triChamp:null,paidS:false,paidT:false};return w.asg;}
 function asgMyGame(w){const A=w.asg;if(!A)return null;const s=A.semis.find(s=>!s.r&&(s.a==='you'||s.b==='you'));if(s)return {g:s,round:'Semifinal'};
@@ -2778,11 +2832,11 @@ function asgFinish(w){const A=ensureAsg(w);asgSim(w,true);if(A.tri==null)A.tri=-
   const f=A.final;addNews(w,`${nT(A.champ)} ganó el Juego de las Estrellas`,`En la final le ganó ${Math.max(...f.r)}-${Math.min(...f.r)} a ${nT(f.a===A.champ?f.b:f.a)}. Las cuatro estrellas: ${A.stars.map(nT).join(', ')}.`,A.champ==='you'?'you':'estrellas');
   const tr=triRank(A);addNews(w,`${nT(A.triChamp)} se quedó con el Concurso de triples`,`Metió ${tr[0][1]} puntos.${A.tri>=0&&A.triChamp!=='you'?` ${nT('you')} hizo ${A.tri}.`:''}`,A.triChamp==='you'?'you':'estrellas');
   return out;}
-function asgHTML(w){const A=ensureAsg(w),star=A.stars.includes('you');let h=`<div class="asgbox"><h4>Fin de semana de las Estrellas</h4><p class="sub" style="margin:0 0 8px">A mitad de temporada se juntan los mejores: el puntero de la NBA, de Primera y de Segunda, más el mejor puntero entre Tercera y Cuarta, juegan el Juego de las Estrellas (semifinales y final) y los mejores tiradores, el Concurso de triples.</p>`;
+function asgHTML(w){const A=ensureAsg(w),star=A.stars.includes('you');let h=`<div class="asgbox"><h4>Fin de semana de las Estrellas</h4><p class="sub" style="margin:0 0 8px">A mitad de temporada se juntan los mejores: el puntero de la NBA, de Primera y de Segunda, más el mejor puntero entre Tercera y Cuarta, juegan el Juego de las Estrellas (semifinales y final) y los que más dobles de afuera metieron en la temporada, el Concurso de triples.</p>`;
   const tr=triRank(A);
   const sh=A.shooters||Object.keys(A.triAI),done=A.tri!=null||!A.youTri,divL=id=>{const d=divOf(w,id);return d>=0?' <small class="sub">'+DIVSH[d]+'</small>':'';};
-  h+=`<h3>Concurso de triples</h3><p class="sub" style="font-size:14px;margin:0 0 6px">Compite el mejor tirador de triples de cada división esta temporada.</p><div class="results">${(done&&A.triChamp?tr:sh.map(id=>[id,null])).map(([id,v],i)=>`<div><span>${done&&A.triChamp?(i+1)+'. ':''}${nm(id)}${divL(id)}</span><span>${v==null?'—':v+' pts'}</span></div>`).join('')}</div>`;
-  if(!A.youTri)h+=`<p class="sub" style="font-size:13px">No te clasificaste: en tu división el mejor tirador es ${nm(sh[divOf(w,'you')])}. Subí tu tiro de lejos para entrar.</p>`;
+  h+=`<h3>Concurso de triples</h3><p class="sub" style="font-size:14px;margin:0 0 6px">Compite el que más dobles de afuera metió en cada división hasta el concurso.</p><div class="results">${(done&&A.triChamp?tr:sh.map(id=>[id,null])).map(([id,v],i)=>`<div><span>${done&&A.triChamp?(i+1)+'. ':''}${nm(id)}${divL(id)} <small class="sub">${(w.ps[id]&&w.ps[id].om)||0} dobles</small></span><span>${v==null?'—':v+' pts'}</span></div>`).join('')}</div>`;
+  if(!A.youTri)h+=`<p class="sub" style="font-size:13px">No te clasificaste: en tu división el que más dobles metió es ${nm(sh[divOf(w,'you')])} (${(w.ps[sh[divOf(w,'you')]]||{}).om||0}; vos llevás ${(w.ps.you||{}).om||0}). Tirá más de afuera para entrar.</p>`;
   if(A.youTri&&A.tri==null)h+=`<div class="row" style="margin-top:8px"><button class="btn primary" id="asgTri">Tirar en el concurso</button></div>`;
   h+=`<h3>Juego de las Estrellas</h3><p class="sub" style="font-size:14px">Estrellas: ${A.stars.map((id,d)=>nm(id)+' ('+['NBA','Primera','Segunda','Ascenso'][d]+')').join(' · ')}</p>`;
   const sr=(s,t)=>s?`<div class="series"><div class="t">${t}</div>${[[s.a,0],[s.b,1]].map(([id,k])=>`<div class="sr ${s.r&&s.r[k]>s.r[1-k]?'win':''}"><span>${nm(id)}</span><span>${s.r?s.r[k]:''}</span></div>`).join('')}</div>`:`<div class="series"><div class="t">${t}</div><div class="sr"><span>A definir</span><span>–</span></div></div>`;
@@ -2803,8 +2857,8 @@ function triSim(st){let s=0;const day=randn()*.08;for(let r=0;r<5;r++)for(let b=
 function startTri(cfg){cfg=Object.assign({tri:true,court:'estadio'},cfg);lastMatch=cfg;audioInit();const me=humanCfg(),dm=rivalCfg('pibe',0);
   setupMatch(me,dm,{mode:'match',court:cfg.court,target:30,rule:'cambio',first:0});game.cfg=cfg;
   game.players[1].x=-900;game.wind=0;game.timeMode=false;
-  game.tri={spot:0,b:0,score:0,clock:70,wait:2.2,res:[[],[],[],[],[]],next:0,ended:false};game.phase='tri';triPlace(true);
-  bigMsg('CONCURSO DE TRIPLES','70 segundos · la última de cada carro vale 2','#ffd23f',2.1);
+  const sp0=cfg.train?Math.floor(rand()*5):0;game.tri={spot:sp0,end:cfg.train?sp0+1:5,b:0,score:0,clock:cfg.train?22:70,wait:2.2,res:[[],[],[],[],[]],next:0,ended:false,train:!!cfg.train};game.phase='tri';triPlace(true);
+  if(cfg.train)bigMsg('ENTRENAMIENTO','5 tiros desde '+TRI_SPOTS[sp0][0].toLowerCase()+' · metés 4 puntos y llegás en ritmo','#75aadb',2.1);else bigMsg('CONCURSO DE TRIPLES','70 segundos · la última de cada carro vale 2','#ffd23f',2.1);
   hideScreens();setMatchUI(true);}
 function triPlace(first){const p=game.players[0],T=game.tri;resetP(p);p.x=HOOP.cx-TRI_SPOTS[T.spot][1];p.facing=1;
   ball.holder=p;ball.state='held';ball.shot=null;ball.cleared=true;ball.grace=[0,0];game.offI=0;if(!first){dust(p.x);msgAt(p,TRI_SPOTS[T.spot][0],'#ffd23f');}}
@@ -2819,7 +2873,7 @@ function triStep(dt){const T=game.tri,p=game.players[0];const r=readHuman();let 
   if(T.next>0){T.next-=dt;if(T.next<=0&&!game.buzzer)triAdvance();}
   if(game.buzzer&&!T.ended){const live=ball.shot&&!ball.shot.done&&!ball.holder;if(!live)triEnd();}}
 function triAdvance(){const T=game.tri,p=game.players[0];T.b++;
-  if(T.b>=5){T.b=0;T.spot++;if(T.spot>=5){triEnd();return;}triPlace(false);return;}
+  if(T.b>=5){T.b=0;T.spot++;if(T.spot>=(T.end||5)){triEnd();return;}triPlace(false);return;}
   ball.holder=p;ball.state='held';ball.shot=null;ball.cleared=true;}
 function triEnd(){const T=game.tri;if(T.ended)return;T.ended=true;game.over=true;game.phase='over';game.players[0].score=T.score;
   bigMsg(T.spot>=5?'¡TERMINASTE!':'¡TIEMPO!',T.score+' puntos','#ffd23f',2);if(T.score>=18){sfx.cheer();confetti(HOOP.cx-200,200,60);}
@@ -2837,6 +2891,10 @@ function drawTriHUD(c){const T=game.tri,cx=VW/2,y=8,w=Math.min(460,VW-40);c.fill
   c.textAlign='center';c.font='700 11px "Barlow Semi Condensed", Arial Narrow, sans-serif';c.fillStyle='#b4c5e6';c.fillText(T.spot<5?TRI_SPOTS[T.spot][0].toUpperCase()+' · CARRO '+(T.spot+1)+' DE 5':'',cx,y+54);
   c.textBaseline='alphabetic';}
 function showTriResult(){setMatchUI(false);const T=game.tri,cfg=game.cfg||{},sc=T.score;
+  if(T.train){const ok=sc>=4,w=save.world;if(ok&&w)save.trainBuff={s:w.season,step:w.step,k:'ritmo'};persist();
+    $('#rTitle').textContent=ok?'¡En ritmo!':'Entrenamiento';$('#rTitle').className='res'+(ok?' win':'');$('#rScore').textContent=`${sc} puntos en 5 tiros`;
+    $('#rReward').innerHTML=ok?'<span class="reward">Llegás en ritmo al partido: tu franja verde es un poco más ancha.</span>':'<p class="sub">No alcanzó (hacían falta 4 puntos). El partido se juega igual, sin bonus.</p>';$('#rTable').innerHTML='';
+    const bt=$('#rBtns');bt.innerHTML='';const x=document.createElement('button');x.className='btn primary';x.textContent='Volver a la carrera';x.onclick=()=>{startDemo();worldTab='temp';show('world');};bt.appendChild(x);show('result');return;}
   const R=save.tri||(save.tri={best:0,plays:0,hist:[],wins:0});R.plays++;const rec=sc>R.best;const prev=R.best;if(rec)R.best=sc;R.hist=(R.hist||[]).concat(sc).slice(-10);
   let rank,reward=[],w=save.world;
   if(cfg.asg&&w&&w.asg&&w.asg.s===w.season){w.asg.tri=sc;rank=triRank(w.asg);w.asg.triChamp=rank[0][0];reward=asgPay(w);}
@@ -3035,7 +3093,10 @@ function evoSVG(w){const H=(w.history||[]).filter(x=>x.you),pts=H.map(x=>({s:x.s
     (p.t.length?`<text x="${X(i)}" y="${Y(p.m)-24}" text-anchor="middle" font-size="12" fill="#ffd23f">★</text>`:'')+
     `<rect x="${X(i)-16}" y="${Ht-B+10}" width="32" height="14" rx="3" fill="${DC[p.d]||'#fff'}"/><text x="${X(i)}" y="${Ht-B+21}" text-anchor="middle" font-size="9" font-weight="800" fill="#0b1830">${['NBA','1ª','2ª','3ª','4ª'][p.d]||''}</text><text x="${X(i)}" y="${Ht-6}" text-anchor="middle" font-size="10" fill="#b4c5e6">${p.now?'ahora':'T'+p.s}</text>`).join('');
   return `<svg viewBox="0 0 ${Wd} ${Ht}" style="width:100%;height:auto;display:block;background:rgba(11,24,48,.3);border:2px solid rgba(246,241,228,.2)" role="img" aria-label="Evolución de tu media por temporada">${g}<path d="${path}" fill="none" stroke="#ffd23f" stroke-width="3" stroke-linejoin="round"/>${dots}</svg><p class="sub" style="font-size:12px;margin:4px 0 0">Media por temporada · color = división · ★ = título</p>`;}
-function worldPost(w,cfg,won,sa,sb,ma,mb){const extra=[];recGame(w,'you',cfg.rival,[sa,sb]);if(ma)recBox(w,'you',cfg.rival,ma);if(mb)recBox(w,cfg.rival,'you',mb);
+function worldPost(w,cfg,won,sa,sb,ma,mb){const extra=[];(w.myRes||(w.myRes={}))[w.season+':'+w.step]={o:cfg.rival,s:sa,r:sb,sim:!!cfg.sim};
+  const G=w.gst&&w.gst.s===w.season?w.gst:(w.gst={s:w.season,cupW:0,clas:0,maxStk:0,best:null});if(won&&cfg.wtype==='C')G.cupW++;if(won&&cfg.clasico)G.clas++;if(!G.best||sa>G.best.s)G.best={s:sa,r:sb,o:cfg.rival};
+  save.lastOpp={id:cfg.rival,court:cfg.court,diff:cfg.diff,res:`${won?'ganaste':'perdiste'} ${sa}-${sb} con ${nT(cfg.rival)}`};
+  w.load=cfg.sim?Math.max(0,(w.load||0)-2):(w.load||0)+1;recGame(w,'you',cfg.rival,[sa,sb]);if(ma)recBox(w,'you',cfg.rival,ma);if(mb)recBox(w,cfg.rival,'you',mb);
   rivAdd(w,cfg.rival,1+(Math.abs(sa-sb)<=2?1:0)+(!won&&'CPSNM'.includes(cfg.wtype||'L')?3:0));
   if(cfg.clasico){if(won&&!cfg.sim){w.drift.you=Math.min(.3,(w.drift.you||0)+.004);extra.push('¡Ganaste el clásico! (tu nivel sube un poquito)');}
     addNews(w,won?`${nT('you')} se quedó con el clásico ante ${nT(cfg.rival)}`:`${nT(cfg.rival)} ganó el clásico ante ${nT('you')}`,`${Math.max(sa,sb)}-${Math.min(sa,sb)}.`,'clasico');}
@@ -3043,7 +3104,7 @@ function worldPost(w,cfg,won,sa,sb,ma,mb){const extra=[];recGame(w,'you',cfg.riv
     else{w.drift.you=(w.drift.you||0)-.003;extra.push('Te comiste tus palabras (tu nivel baja un poquito)');addNews(w,`${nT(cfg.rival)} le cerró la boca a ${nT('you')}`,`Después de lo que dijo en la entrevista, perdió ${Math.min(sa,sb)}-${Math.max(sa,sb)}.`,'clasico');}}
   const r=RIVALS[cfg.rival],ST=save.story||(save.story={});
   if(r&&!cfg.sim&&(r.tier==='leyenda'||FOREIGN.has(cfg.rival))&&!ST.idol){ST.idol=cfg.rival;celebrate('Frente a tu ídolo',`Jugaste contra ${r.name}${won?' ¡y le ganaste!':'. Un día que no vas a olvidar.'}`,'star','#c9a2ff','MOMENTO DE CARRERA');}
-  extra.push(...formAfter(won,true));return extra;}
+  extra.push(...formAfter(won,true));{const F=save.form||{};if(F.streak>G.maxStk)G.maxStk=F.streak;}return extra;}
 function simMyMatch(w,nx){const cfg=worldMatchCfg(w,nx);cfg.sim=true;const opp=nx.opp;
   const [s,o]=simGame('you',opp,11,0,id=>{if(id!=='you')return wStats(w,id);const h=humanStats(),r={};for(const k in h)r[k]=clamp(h[k]-.03-(nx.diff||0)*.15,.05,.98);return r;});
   const won=s>o,extra=worldPost(w,cfg,won,s,o,null,null);const rw=worldAdvance(w,{s,o,ms:{stl:0,blk:0,reb:0},os:null,simmed:true});
@@ -3166,8 +3227,13 @@ function renderQuick(){const q=save.q;const el=$('#qRivals');el.innerHTML='';
   chipRow($('#qCourts'),Object.keys(COURTS).map(k=>[k,COURTS[k].name]),q.c,v=>{q.c=v;persist();renderQuick();});$('#qCdesc').textContent=COURTS[q.c].desc;
   chipRow($('#qLen'),[[q.target,'A 11 o 2 minutos, lo que llegue primero']],q.target,v=>{q.target=v;persist();renderQuick();});
   chipRow($('#qRule'),[['cambio','Cambio de posesión'],['sigue','El que mete sigue']],q.rule,v=>{q.rule=v;persist();renderQuick();});
-  chipRow($('#qDiff'),[[-1,'Fácil'],[0,'Normal'],[1,'Difícil']],q.diff,v=>{q.diff=v;persist();renderQuick();});}
-$('#qPlay').addEventListener('click',()=>{const q=save.q;startMatch({rival:q.r,court:q.c,target:11,time:q.target==='t120'?120:0,rule:q.rule,diff:q.diff,stageLabel:'Partido rápido'});});
+  chipRow($('#qDiff'),[[-1,'Fácil'],[0,'Normal'],[1,'Difícil']],q.diff,v=>{q.diff=v;persist();renderQuick();});
+  if(q.ref===undefined)q.ref=-1;if(q.rain===undefined)q.rain=-1;
+  chipRow($('#qRef'),[[-1,'Sorteo'],...REFS.map((r,i)=>[i,r[0]+' ('+r[3]+')'])],q.ref,v=>{q.ref=v;persist();renderQuick();});
+  chipRow($('#qRain'),[[-1,'Sorteo'],[0,'Sin lluvia'],[1,'Lluvia']],q.rain,v=>{q.rain=v;persist();renderQuick();});
+  const rv=$('#qRev');rv.innerHTML='';const lo=save.lastOpp;if(lo&&RIVALS[lo.id]){const b=document.createElement('button');b.className='btn primary';b.textContent=`Revancha vs ${RIVALS[lo.id].name}`;b.onclick=()=>startMatch({rival:lo.id,court:lo.court||'club',target:11,time:120,rule:'cambio',diff:lo.diff||0,stageLabel:'Revancha amistosa'});rv.appendChild(b);
+    const s2=document.createElement('span');s2.className='sub';s2.style.marginLeft='8px';s2.textContent=`Tu último partido de carrera: ${lo.res}`;rv.appendChild(s2);}}
+$('#qPlay').addEventListener('click',()=>{const q=save.q;startMatch({rival:q.r,court:q.c,target:11,time:120,rule:q.rule,diff:q.diff,stageLabel:'Amistoso',ref:q.ref>=0?q.ref:null,rain:q.rain>=0?!!q.rain:null});});
 function renderPlayer(){const nm=$('#pName');if(document.activeElement!==nm)nm.value=save.name;
   chipRow($('#pArch'),Object.keys(ARCH).map(k=>[k,ARCH[k].name+' · '+ARCH[k].hm.toFixed(2).replace('.',',')+' m']),save.arch,v=>{save.arch=v;persist();renderPlayer();});
   const sw=(el,list,cur,set)=>{el.innerHTML='';for(const col of list){const b=document.createElement('button');b.className='sw'+(cur===col?' sel':'');b.style.background=col;b.setAttribute('aria-label','Color '+col);b.addEventListener('click',()=>{set(col);persist();renderPlayer();});el.appendChild(b);}};
@@ -3225,16 +3291,17 @@ function showResult(won){setMatchUI(false);const cfg=game.cfg,[a,b]=game.players
   else if(a.injury){save.injury={k:a.injury.k,amt:+a.injury.amt.toFixed(3),games:2};injMsg=`Terminaste con una molestia: ${INJ_LBL[a.injury.k]} -${Math.round(a.injury.amt*99)} por 2 partidos.`;}
   else if(IJ&&IJ.games>0){IJ.games--;if(IJ.games<=0){save.injury=null;injMsg='Te recuperaste de la molestia.';}else injMsg=`Seguís con molestias (${INJ_LBL[IJ.k]}): ${IJ.games} partido más.`;}
   if(b.injury&&cfg.world&&save.world){const w=save.world;(w.inj||(w.inj={}))[cfg.rival]={k:b.injury.k,amt:b.injury.amt,g:2};addNews(w,`${nT(cfg.rival)} quedó tocado`,`Se golpeó en el partido con ${nT('you')} y va a jugar con molestias.`,'lesion');}
-  const grown=[];if(game.mode==='match'&&cfg.rival&&!cfg.tri&&!cfg.asg)scoutSave(cfg.rival,a);
+  const grown=[];if(game.mode==='match'&&cfg.rival&&!cfg.tri&&!cfg.asg)scoutSave(cfg.rival,a);if(cfg.world&&cfg.train)save.trainBuff=null;
+  const mil=checkMiles(a);
   persist();
   $('#rTitle').textContent=won?'¡Ganaste!':'Perdiste';$('#rTitle').className='res'+(won?' win':'');
   $('#rScore').textContent=`${a.name} ${a.score} – ${b.score} ${b.name}`;
-  $('#rReward').innerHTML=(reward?`<span class="reward">${reward}</span>`:'')+(nemMsg?`<p class="nem">${nemMsg}</p>`:'')+(grown.length?`<p class="grow">Mejoraste jugando: ${grown.join(' · ')}</p>`:'')+(injMsg?`<p class="nem">${injMsg}</p>`:'')+(extra.length?`<p class="grow">${extra.join(' · ')}</p>`:'');
+  $('#rReward').innerHTML=(reward?`<span class="reward">${reward}</span>`:'')+(nemMsg?`<p class="nem">${nemMsg}</p>`:'')+(grown.length?`<p class="grow">Mejoraste jugando: ${grown.join(' · ')}</p>`:'')+(injMsg?`<p class="nem">${injMsg}</p>`:'')+(extra.length?`<p class="grow">${extra.join(' · ')}</p>`:'')+(mil.length?`<p class="grow">${mil.join(' · ')}</p>`:'');
   const pct=(m,n)=>n?Math.round(m/n*100)+'%':'—';
   const row=p=>{const s=p.stats;return `<tr><td>${p.name}</td><td>${s.pts}</td><td>${s.im}/${s.ia}</td><td>${s.om}/${s.oa}</td><td>${s.ftm}/${s.fta}</td><td>${pct(s.im+s.om,s.ia+s.oa)}</td><td>${s.reb}</td><td>${s.stl}</td><td>${s.blk}</td><td>${s.dnk}</td><td>${s.fl}</td></tr>`;};
   $('#rTable').innerHTML=`<thead><tr><th>Jugador</th><th>Pts</th><th>De 1</th><th>De 2</th><th>TL</th><th>%</th><th>Reb</th><th>Rob</th><th>Tap</th><th>Volc</th><th>Falt</th></tr></thead><tbody>${row(a)}${row(b)}</tbody>`;
   const bt=$('#rBtns');bt.innerHTML='';const add=(txt,cls,fn)=>{const x=document.createElement('button');x.className='btn '+cls;x.textContent=txt;x.addEventListener('click',fn);bt.appendChild(x);};
-  if(cfg.world){add('Volver a la carrera','primary',()=>{startDemo();worldTab='temp';show('world');});}
+  if(cfg.world){add('Volver a la carrera','primary',()=>{startDemo();worldTab='temp';show('world');});if(!cfg.asg)add('Revancha amistosa','',()=>startMatch({rival:cfg.rival,court:cfg.court,target:11,time:120,rule:'cambio',diff:cfg.diff||0,stageLabel:'Revancha amistosa'}));}
   else if(cfg.career){add('Volver a la carrera','primary',()=>{startDemo();show('career');});}
   else if(cfg.league){add('Volver a la liga','primary',()=>{startDemo();show('league');});}
   else if(cfg.tourney){const t=TOURNEYS.find(x=>x.id===cfg.tourney);
