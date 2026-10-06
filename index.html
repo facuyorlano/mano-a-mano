@@ -3620,4 +3620,5 @@ window.__mm={startTri,triSim,ensureAsg,asgFinish,openCard,trophies,legacy,doReti
 layout();startDemo();show('menu');requestAnimationFrame(frame);saveBadge();cloudInit();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{bgDirty=true;});
 </script>
-<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+<script>if('serviceWorker' in navigator){let rl=false;const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rl||!had)return;rl=true;location.reload();});
+addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{const up=()=>reg.update().catch(()=>{});up();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')up();});}).catch(()=>{}));}</script>

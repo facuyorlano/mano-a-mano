@@ -1,9 +1,9 @@
 {
   "name": "Mano a Mano Básquet",
   "short_name": "Mano a Mano",
-  "description": "Básquet 1 contra 1: de Cuarta con tus amigos a la NBA.",
+  "description": "Básquet 1 contra 1: del potrero con tus amigos a la NBA.",
   "lang": "es-AR",
-  "start_url": "./",
+  "start_url": "./?app=1",
   "scope": "./",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
